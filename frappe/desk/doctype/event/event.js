@@ -9,12 +9,11 @@ frappe.ui.form.on("Event", "refresh", function(frm) {
 	}
 });
 
-
-cur_frm.cscript.repeat_on = function(doc, cdt, cdn) {
-	if(doc.repeat_on==="Every Day") {
+frappe.ui.form.on("Event", "repeat_on", function(frm,doc) {
+	if(frm.doc.repeat_on==="Every Day") {
 		$.each(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"], function(i,v) {
 			cur_frm.set_value(v, 1);
 		})
 	}
-}
+});
 

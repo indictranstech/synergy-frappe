@@ -1,5 +1,5 @@
 // bind events
-
+frappe.provide("frappe.views.calendars");
 frappe.ui.form.on("ToDo", "refresh", function(frm) {
 	if(frm.doc.reference_type && frm.doc.reference_name) {
 		frm.add_custom_button(__(frm.doc.reference_name), function() {
