@@ -203,8 +203,9 @@ _f.Frm.prototype.watch_model_updates = function() {
 
 	// on table fields
 	var table_fields = frappe.get_children("DocType", me.doctype, "fields", {fieldtype:"Table"});
-	for (var i=0, l=table_fields.length; i < l; i++) {
-		var df = table_fields[i];
+
+	// using $.each to preserve df via closure
+	$.each(table_fields, function(i, df) {
 		frappe.model.on(df.options, "*", function(fieldname, value, doc) {
 			if(doc.parent===me.docname && doc.parentfield===df.fieldname) {
 				me.dirty();
@@ -212,7 +213,7 @@ _f.Frm.prototype.watch_model_updates = function() {
 				me.script_manager.trigger(fieldname, doc.doctype, doc.name);
 			}
 		});
-	}
+	});
 }
 
 _f.Frm.prototype.onhide = function() {
@@ -707,7 +708,6 @@ _f.get_value = function(dt, dn, fn) {
 _f.Frm.prototype.dirty = function() {
 	this.doc.__unsaved = 1;
 	$(this.wrapper).trigger('dirty');
-	this.toolbar.set_primary_action(true);
 }
 
 _f.Frm.prototype.get_docinfo = function() {

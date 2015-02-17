@@ -339,8 +339,8 @@ frappe.views.DocListView = frappe.ui.Listing.extend({
 			this.page.add_menu_item(__("Import"), function() {
 				frappe.set_route("data-import-tool", {
 					doctype: me.doctype
-				}, true)
-			});
+				});
+			}, true);
 		}
 		if(frappe.model.can_set_user_permissions(this.doctype)) {
 			this.page.add_menu_item(__("User Permissions Manager"), function() {
@@ -385,12 +385,16 @@ frappe.views.DocListView = frappe.ui.Listing.extend({
 
 		if(this.can_delete || this.listview.settings.selectable) {
 			this.list_header.find(".list-select-all").on("click", function() {
-				console.log('select all clicked!');
 				me.$page.find('.list-delete').prop("checked", $(this).prop("checked"));
 				me.toggle_delete();
 			});
 
 			this.$page.on("click", ".list-delete", function() {
+				me.toggle_delete();
+			});
+
+			// after delete, hide delete button
+			this.$w.on("render-complete", function() {
 				me.toggle_delete();
 			});
 		}
