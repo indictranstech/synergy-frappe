@@ -98,8 +98,6 @@ _f.Frm.prototype.setup = function() {
 		page: this.page
 	});
 
-	this.frm_head = this.toolbar;
-
 	// print layout
 	this.setup_print_layout();
 
@@ -203,8 +201,9 @@ _f.Frm.prototype.watch_model_updates = function() {
 
 	// on table fields
 	var table_fields = frappe.get_children("DocType", me.doctype, "fields", {fieldtype:"Table"});
-	for (var i=0, l=table_fields.length; i < l; i++) {
-		var df = table_fields[i];
+
+	// using $.each to preserve df via closure
+	$.each(table_fields, function(i, df) {
 		frappe.model.on(df.options, "*", function(fieldname, value, doc) {
 			if(doc.parent===me.docname && doc.parentfield===df.fieldname) {
 				me.dirty();
@@ -212,17 +211,13 @@ _f.Frm.prototype.watch_model_updates = function() {
 				me.script_manager.trigger(fieldname, doc.doctype, doc.name);
 			}
 		});
-	}
-}
-
-_f.Frm.prototype.onhide = function() {
-	if(_f.cur_grid_cell) _f.cur_grid_cell.grid.cell_deselect();
+	});
 }
 
 _f.Frm.prototype.setup_std_layout = function() {
 	this.form_wrapper = $('<div></div>').appendTo(this.layout_main);
-	this.body_header	= $("<div>").appendTo(this.form_wrapper);
-	this.body 			= $("<div>").appendTo(this.form_wrapper);
+	this.inner_toolbar	= $('<div class="form-inner-toolbar hide"></div>').appendTo(this.form_wrapper);
+	this.body 			= $('<div></div>').appendTo(this.form_wrapper);
 
 	// only tray
 	this.meta.section_style='Simple'; // always simple!
@@ -307,11 +302,6 @@ _f.Frm.prototype.setup_meta = function(doctype) {
 	if(this.meta.istable) { this.meta.in_dialog = 1 }
 }
 
-_f.Frm.prototype.defocus_rest = function() {
-	// deselect others
-	if(_f.cur_grid_cell) _f.cur_grid_cell.grid.cell_deselect();
-}
-
 _f.Frm.prototype.refresh_header = function() {
 	// set title
 	// main title
@@ -323,9 +313,11 @@ _f.Frm.prototype.refresh_header = function() {
 		frappe.ui.toolbar.recent.add(this.doctype, this.docname, 1);
 
 	// show / hide buttons
-	if(this.frm_head) {
-		this.frm_head.refresh();
+	if(this.toolbar) {
+		this.toolbar.refresh();
 	}
+
+	this.clear_custom_buttons();
 
 	this.show_web_link();
 }
@@ -492,6 +484,7 @@ _f.Frm.prototype.setnewdoc = function() {
 	// this.check_doctype_conflict(docname);
 	var me = this;
 
+	// hide any open grid
 	this.script_manager.trigger("before_load", this.doctype, this.docname, function() {
 		me.script_manager.trigger("onload");
 		me.opendocs[me.docname] = true;
@@ -561,6 +554,9 @@ _f.Frm.prototype.save = function(save_action, callback, btn, on_error) {
 	btn && $(btn).prop("disabled", true);
 	$(document.activeElement).blur();
 
+	var open_form = frappe.ui.form.get_open_grid_form();
+	open_form && open_form.hide_form();
+
 	// let any pending js process finish
 	var me = this;
 	setTimeout(function() { me._save(save_action, callback, btn, on_error) }, 100);
@@ -578,6 +574,7 @@ _f.Frm.prototype._save = function(save_action, callback, btn, on_error) {
 		// validate
 		validated = true;
 		this.script_manager.trigger("validate");
+		this.script_manager.trigger("before_save");
 
 		if(!validated) {
 			if(on_error)
@@ -588,6 +585,7 @@ _f.Frm.prototype._save = function(save_action, callback, btn, on_error) {
 
 	var after_save = function(r) {
 		if(!r.exc) {
+			me.script_manager.trigger("after_save");
 			me.refresh();
 		} else {
 			if(on_error)
@@ -707,7 +705,6 @@ _f.get_value = function(dt, dn, fn) {
 _f.Frm.prototype.dirty = function() {
 	this.doc.__unsaved = 1;
 	$(this.wrapper).trigger('dirty');
-	this.toolbar.set_primary_action(true);
 }
 
 _f.Frm.prototype.get_docinfo = function() {
@@ -748,10 +745,13 @@ _f.Frm.prototype.set_footnote = function(txt) {
 
 
 _f.Frm.prototype.add_custom_button = function(label, fn, icon, toolbar_or_class) {
-	this.page.add_menu_item(label, fn);
+	return $('<button class="btn btn-default btn-xs" style="margin-left: 10px;">'+__(label)+'</btn>')
+		.on("click", fn).appendTo(this.inner_toolbar.removeClass("hide"))
+	//return this.page.add_menu_item(label, fn);
 }
 
 _f.Frm.prototype.clear_custom_buttons = function() {
+	this.inner_toolbar.empty().addClass("hide");
 	this.page.clear_user_actions();
 }
 

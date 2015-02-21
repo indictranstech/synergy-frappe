@@ -21,7 +21,7 @@ class DatabaseQuery(object):
 		self.user = None
 		self.flags = frappe._dict()
 
-	def execute(self, query=None, filters=None, fields=None, or_filters=None,
+	def execute(self, query=None, fields=None, filters=None, or_filters=None,
 		docstatus=None, group_by=None, order_by=None, limit_start=0,
 		limit_page_length=20, as_list=False, with_childnames=False, debug=False,
 		ignore_permissions=False, user=None):
@@ -35,8 +35,8 @@ class DatabaseQuery(object):
 		self.docstatus = docstatus or []
 		self.group_by = group_by
 		self.order_by = order_by
-		self.limit_start = int(limit_start)
-		self.limit_page_length = int(limit_page_length)
+		self.limit_start = int(limit_start) if limit_start else 0
+		self.limit_page_length = int(limit_page_length) if limit_page_length else 20
 		self.with_childnames = with_childnames
 		self.debug = debug
 		self.as_list = as_list
@@ -100,18 +100,23 @@ class DatabaseQuery(object):
 		return args
 
 	def parse_args(self):
-		if isinstance(self.filters, basestring):
-			self.filters = json.loads(self.filters)
 		if isinstance(self.fields, basestring):
 			if self.fields == "*":
 				self.fields = ["*"]
 			else:
 				self.fields = json.loads(self.fields)
-		if isinstance(self.filters, dict):
-			fdict = self.filters
-			self.filters = []
-			for key, value in fdict.iteritems():
-				self.filters.append(self.make_filter_tuple(key, value))
+
+		for filter_name in ["filters", "or_filters"]:
+			filters = getattr(self, filter_name)
+			if isinstance(filters, basestring):
+				filters = json.loads(filters)
+
+			if isinstance(filters, dict):
+				fdict = filters
+				filters = []
+				for key, value in fdict.iteritems():
+					filters.append(self.make_filter_tuple(key, value))
+			setattr(self, filter_name, filters)
 
 	def make_filter_tuple(self, key, value):
 		if isinstance(value, (list, tuple)):

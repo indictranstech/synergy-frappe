@@ -16,12 +16,13 @@ def get_controller(doctype):
 	For `custom` type, returns `frappe.model.document.Document`.
 
 	:param doctype: DocType name as string."""
+	from frappe.model.document import Document
 	if not doctype in _classes:
 		module_name, custom = frappe.db.get_value("DocType", doctype, ["module", "custom"]) \
 			or ["Core", False]
 
 		if custom:
-			_class = BaseDocument
+			_class = Document
 		else:
 			module = load_doctype_module(doctype, module_name)
 			classname = doctype.replace(" ", "").replace("-", "")
@@ -220,7 +221,10 @@ class BaseDocument(object):
 		return fieldname[0] if fieldname else None
 
 	def db_insert(self):
-		set_new_name(self)
+		"""INSERT the document (with valid columns) in the database."""
+		if not self.name:
+			# name will be set by document class in most cases
+			set_new_name(self)
 		d = self.get_valid_dict()
 		columns = d.keys()
 		try:
@@ -233,6 +237,7 @@ class BaseDocument(object):
 		except Exception, e:
 			if e.args[0]==1062:
 				if self.meta.autoname=="hash":
+					self.name = None
 					self.db_insert()
 					return
 				type, value, traceback = sys.exc_info()
@@ -393,6 +398,36 @@ class BaseDocument(object):
 			if df and not df.allow_on_submit and (self.get(key) or value) and self.get(key) != value:
 				frappe.throw(_("Not allowed to change {0} after submission").format(df.label),
 					frappe.UpdateAfterSubmitError)
+
+	def precision(self, fieldname, parentfield=None):
+		"""Returns float precision for a particular field (or get global default).
+
+		:param fieldname: Fieldname for which precision is required.
+		:param parentfield: If fieldname is in child table."""
+		from frappe.model.meta import get_field_precision
+
+		if parentfield and not isinstance(parentfield, basestring):
+			parentfield = parentfield.parentfield
+
+		cache_key = parentfield or "main"
+
+		if not hasattr(self, "_precision"):
+			self._precision = frappe._dict()
+
+		if cache_key not in self._precision:
+			self._precision[cache_key] = frappe._dict()
+
+		if fieldname not in self._precision[cache_key]:
+			self._precision[cache_key][fieldname] = None
+
+			doctype = self.meta.get_field(parentfield).options if parentfield else self.doctype
+			df = frappe.get_meta(doctype).get_field(fieldname)
+
+			if df.fieldtype in ("Currency", "Float", "Percent"):
+				self._precision[cache_key][fieldname] = get_field_precision(df, self)
+
+		return self._precision[cache_key][fieldname]
+
 
 	def get_formatted(self, fieldname, doc=None, currency=None):
 		from frappe.utils.formatters import format_value

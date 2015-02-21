@@ -36,6 +36,8 @@ frappe.views.ListView = Class.extend({
 		this.doclistview.onreset = function() {
 			me.id_list = [];
 		}
+		this.order_by = this.settings.order_by;
+		this.group_by = this.settings.group_by;
 	},
 	set_fields: function() {
 		var me = this;
@@ -257,8 +259,12 @@ frappe.views.ListView = Class.extend({
 
 	get_indicator: function(doc) {
         var indicator = frappe.get_indicator(doc, this.doctype);
-        return '<span class="indicator '+indicator[1]+' filterable" data-filter="'
-			+indicator[2]+'">'+indicator[0]+'<span>';
+		if(indicator) {
+	        return '<span class="indicator '+indicator[1]+' filterable" data-filter="'
+				+indicator[2]+'">'+indicator[0]+'<span>';
+		} else {
+			return "";
+		}
 	},
 
 	get_indicator_dot: function(doc) {

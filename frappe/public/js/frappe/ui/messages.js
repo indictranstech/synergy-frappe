@@ -34,19 +34,19 @@ frappe.confirm = function(message, ifyes, ifno) {
 	return d;
 }
 
-frappe.get_value = function(field, callback) {
+frappe.prompt = function(fields, callback, title, primary_label) {
+	if(!$.isArray(fields)) fields = [fields];
 	var d = new frappe.ui.Dialog({
-		fields: [field, {fieldtype:"Button", "label":__("Submit")}],
-		title: __("Enter Value"),
+		fields: fields,
+		title: title || __("Enter Value"),
 	})
-	d.get_input("submit").on("click", function() {
+	d.set_primary_action(primary_label || __("Submit"), function() {
 		var values = d.get_values();
-		if(field.reqd && !values[field.fieldname]) {
-			// ask to re-enter
-		} else {
-			d.hide();
-			callback(values[field.fieldname]);
+		if(!values) {
+			return;
 		}
+		d.hide();
+		callback(values);
 	})
 	d.show();
 }

@@ -25,10 +25,13 @@
   width: 100%;
   min-height: 20px;
 }
-.slick-cell {
+.slick-cell,
+.slick-headerrow-column {
   font-size: 12px;
-  border-color: #d1d8dd !important;
+  border-color: transparent #d1d8dd #d1d8dd transparent !important;
+  border-style: solid;
   color: inherit !important;
+  margin-top: -1px;
 }
 .slick-header-column,
 .slick-header-columns {
@@ -37,6 +40,11 @@
   background-color: #f7fafc;
   border-color: #d1d8dd !important;
   color: #8d99a6 !important;
+}
+.slick-header-column:hover,
+.slick-header-column-active {
+  background-image: none;
+  background-color: #d9e7f1;
 }
 .slick-row.odd .slick-cell {
   background-color: #fafbfc;

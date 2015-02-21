@@ -461,6 +461,12 @@ class Database:
 		return frappe._dict(self.sql("""select field, value from
 			tabSingles where doctype=%s""", doctype))
 
+	def get_all(self, *args, **kwargs):
+		return frappe.get_all(*args, **kwargs)
+
+	def get_list(self, *args, **kwargs):
+		return frappe.get_list(*args, **kwargs)
+
 	def get_single_value(self, doctype, fieldname):
 		"""Get property of Single DocType."""
 		val = self.sql("""select value from
@@ -599,7 +605,7 @@ class Database:
 			return frappe.defaults.get_defaults(parent)
 
 	def begin(self):
-		return # not required
+		self.sql("start transaction")
 
 	def commit(self):
 		"""Commit current transaction. Calls SQL `COMMIT`."""
@@ -609,6 +615,7 @@ class Database:
 	def rollback(self):
 		"""`ROLLBACK` current transaction."""
 		self.sql("rollback")
+		self.begin()
 		for obj in frappe.local.rollback_observers:
 			if hasattr(obj, "on_rollback"):
 				obj.on_rollback()
@@ -672,6 +679,10 @@ class Database:
 	def get_table_columns(self, doctype):
 		"""Returns list of column names from given doctype."""
 		return [r[0] for r in self.sql("DESC `tab%s`" % doctype)]
+
+	def has_column(self, doctype, column):
+		"""Returns True if column exists in database."""
+		return column in self.get_table_columns(doctype)
 
 	def add_index(self, doctype, fields, index_name=None):
 		"""Creates an index with given fields if not already created.

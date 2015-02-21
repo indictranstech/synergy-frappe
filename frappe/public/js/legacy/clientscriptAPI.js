@@ -146,11 +146,15 @@ _f.Frm.prototype.field_map = function(fnames, fn) {
 	}
 }
 
+_f.Frm.prototype.get_docfield = function(fieldname) {
+	return frappe.meta.get_docfield(this.doctype, fieldname, this.docname);
+}
+
 _f.Frm.prototype.set_df_property = function(fieldname, property, value) {
-	var field = frappe.meta.get_docfield(cur_frm.doctype, fieldname, cur_frm.docname)
+	var field = this.get_docfield(fieldname);
 	if(field) {
 		field[property] = value;
-		cur_frm.refresh_field(fieldname);
+		this.refresh_field(fieldname);
 	};
 }
 
@@ -188,6 +192,14 @@ _f.Frm.prototype.set_query = function(fieldname, opt1, opt2) {
 
 _f.Frm.prototype.set_value_if_missing = function(field, value) {
 	this.set_value(field, value, true);
+}
+
+_f.Frm.prototype.clear_table = function(fieldname) {
+	frappe.model.clear_table(this.doc, fieldname);
+}
+
+_f.Frm.prototype.add_child = function(fieldname) {
+	return frappe.model.add_child(this.doc, frappe.meta.get_docfield(this.doctype, fieldname).options, fieldname);
 }
 
 _f.Frm.prototype.set_value = function(field, value, if_missing) {
@@ -267,9 +279,10 @@ _f.Frm.prototype.get_field = function(field) {
 	return cur_frm.fields_dict[field];
 };
 
-_f.Frm.prototype.new_doc = function(doctype, field) {
-	frappe._from_link = field; frappe._from_link_scrollY = scrollY;
-	new_doc(doctype);
+_f.Frm.prototype.new_doc = function(doctype, field, opts) {
+	frappe._from_link = field;
+	frappe._from_link_scrollY = scrollY;
+	new_doc(doctype, opts);
 }
 
 
@@ -282,6 +295,10 @@ _f.Frm.prototype.set_read_only = function() {
 	}
 	cur_frm.perm = perm;
 }
+
+_f.Frm.prototype.trigger = function(event) {
+	this.script_manager.trigger(event);
+};
 
 _f.Frm.prototype.get_formatted = function(fieldname) {
 	return frappe.format(this.doc[fieldname],

@@ -163,7 +163,7 @@ def cache():
 	global redis_server
 	if not redis_server:
 		from frappe.utils.redis_wrapper import RedisWrapper
-		redis_server = RedisWrapper(conf.get("redis_server") or "localhost")
+		redis_server = RedisWrapper.from_url(conf.get("cache_redis_server") or "redis://localhost")
 	return redis_server
 
 def get_traceback():
@@ -441,6 +441,10 @@ def get_doc(arg1, arg2=None):
 	import frappe.model.document
 	return frappe.model.document.get_doc(arg1, arg2)
 
+def get_single(doctype):
+	"""Return a `frappe.model.document.Document` object of the given Single doctype."""
+	return get_doc(doctype, doctype)
+
 def get_meta(doctype, cached=True):
 	"""Get `frappe.model.meta.Meta` instance of given doctype name."""
 	import frappe.model.meta
@@ -465,6 +469,10 @@ def delete_doc_if_exists(doctype, name):
 	if db.exists(doctype, name):
 		delete_doc(doctype, name)
 
+def reload_doctype(doctype):
+	"""Reload DocType from model (`[module]/[doctype]/[name]/[name].json`) files."""
+	reload_doc(scrub(db.get_value("DocType", doctype, "module")), "doctype", scrub(doctype))
+
 def reload_doc(module, dt=None, dn=None, force=False):
 	"""Reload Document from model (`[module]/[doctype]/[name]/[name].json`) files.
 
@@ -473,6 +481,7 @@ def reload_doc(module, dt=None, dn=None, force=False):
 	:param dn: Document name.
 	:param force: Reload even if `modified` timestamp matches.
 	"""
+
 	import frappe.modules
 	return frappe.modules.reload_doc(module, dt, dn, force=force)
 

@@ -38,6 +38,9 @@ frappe.ui.form.Toolbar = Class.extend({
 		}
 		var me = this;
 		this.page.set_title(title);
+		if(this.frm.meta.title_field) {
+			document.title = title + " - " + this.frm.docname;
+		}
 		this.set_indicator();
 	},
 	get_dropdown_menu: function(label) {
@@ -89,6 +92,10 @@ frappe.ui.form.Toolbar = Class.extend({
 				me.frm.rename_doc();}, true);
 		}
 
+		// reload
+		this.page.add_menu_item(__("Reload"), function() {
+			me.frm.reload_doc();}, true);
+
 		// delete
 		if((cint(me.frm.doc.docstatus) != 1) && !me.frm.doc.__islocal
 			&& frappe.model.can_delete(me.frm.doctype)) {
@@ -97,7 +104,7 @@ frappe.ui.form.Toolbar = Class.extend({
 		}
 
 		// New
-		if(p[CREATE]) {
+		if(p[CREATE] && !this.frm.meta.issingle) {
 			this.page.add_menu_item(__("New {0}", [__(me.frm.doctype)]), function() {
 				new_doc(me.frm.doctype);}, true);
 		}

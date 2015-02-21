@@ -77,6 +77,9 @@
   font-size: 120%;
   border-bottom: 1px solid #d1d8dd;
 }
+.grid-footer {
+  background-color: #fff;
+}
 .grid-footer-toolbar {
   padding: 10px 15px;
   border-top: 1px solid #d1d8dd;
@@ -91,4 +94,8 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   padding-right: 0px;
+}
+.grid-label {
+  margin-right: 8px;
+  margin-bottom: 4px;
 }
