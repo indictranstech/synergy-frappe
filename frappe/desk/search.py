@@ -62,7 +62,10 @@ def search_widget(doctype, txt, query=None, searchfield=None, start=0,
 			if txt:
 				if meta.search_fields:
 					for f in meta.get_search_fields():
-						or_filters.append([doctype, f.strip(), "like", "%{0}%".format(txt)])
+						fmeta = meta.get_field(f.strip())
+						if f == "name" or (fmeta and fmeta.fieldtype in ["Data", "Text", "Small Text", "Long Text",
+							"Link", "Select", "Read Only", "Text Editor"]):
+								or_filters.append([doctype, f.strip(), "like", "%{0}%".format(txt)])
 				else:
 					filters.append([doctype, searchfield or "name", "like", "%{0}%".format(txt)])
 
@@ -91,7 +94,8 @@ def search_widget(doctype, txt, query=None, searchfield=None, start=0,
 def get_std_fields_list(meta, key):
 	# get additional search fields
 	sflist = meta.search_fields and meta.search_fields.split(",") or []
-	sflist = ['name'] + sflist
+	title_field = [meta.title_field] if (meta.title_field and meta.title_field not in sflist) else []
+	sflist = ['name'] + sflist + title_field
 	if not key in sflist:
 		sflist = sflist + [key]
 

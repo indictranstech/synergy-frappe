@@ -22,6 +22,7 @@ def main(app=None, module=None, doctype=None, verbose=False, tests=(), force=Fal
 
 	# workaround! since there is no separate test db
 	frappe.clear_cache()
+	set_test_email_config()
 
 	if verbose:
 		print 'Running "before_tests" hooks'
@@ -41,6 +42,15 @@ def main(app=None, module=None, doctype=None, verbose=False, tests=(), force=Fal
 	frappe.clear_cache()
 
 	return ret
+
+def set_test_email_config():
+	frappe.conf.update({
+		"auto_email_id": "test@example.com",
+		"mail_server": "smtp.example.com",
+		"mail_login": "test@example.com",
+		"mail_password": "test",
+		"admin_password": "admin"
+	})
 
 def run_all_tests(app=None, verbose=False):
 	import os
@@ -198,6 +208,7 @@ def make_test_objects(doctype, test_records, verbose=None):
 			doc["doctype"] = doctype
 
 		d = frappe.copy_doc(doc)
+
 		if doc.get('name'):
 			d.name = doc.get('name')
 
@@ -213,6 +224,8 @@ def make_test_objects(doctype, test_records, verbose=None):
 		docstatus = d.docstatus
 
 		d.docstatus = 0
+		d.run_method("before_test_insert")
+
 		try:
 			d.insert()
 

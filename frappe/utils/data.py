@@ -8,26 +8,53 @@ import frappe
 import operator
 import re, urllib, datetime, math
 import babel.dates
+from dateutil import parser
+
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
 
 # datetime functions
 def getdate(string_date):
 	"""
 		 Coverts string date (yyyy-mm-dd) to datetime.date object
 	"""
-	if isinstance(string_date, datetime.date):
-		return string_date
-
-	elif isinstance(string_date, datetime.datetime):
+	if isinstance(string_date, datetime.datetime):
 		return string_date.date()
+
+	elif isinstance(string_date, datetime.date):
+		return string_date
 
 	if " " in string_date:
 		string_date = string_date.split(" ")[0]
 
 	return datetime.datetime.strptime(string_date, "%Y-%m-%d").date()
 
+def get_datetime(datetime_str):
+	if isinstance(datetime_str, datetime.datetime):
+		return datetime_str
+
+	elif isinstance(datetime_str, datetime.date):
+		return datetime.datetime.combine(datetime_str, datetime.time())
+
+	try:
+		return datetime.datetime.strptime(datetime_str, DATETIME_FORMAT)
+
+	except ValueError:
+		if datetime_str=='0000-00-00 00:00:00.000000':
+			return None
+
+		return datetime.datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
+
 def add_to_date(date, years=0, months=0, days=0):
 	"""Adds `days` to the given date"""
-	format = isinstance(date, basestring)
+
+	# save time part
+	with_time = False
+	as_string = isinstance(date, basestring)
+	if as_string:
+		if " " in date: with_time = date.split()[1]
+	elif isinstance(date, datetime.datetime):
+		with_time = date.time().strftime(DATETIME_FORMAT.split()[1])
+
 	if date:
 		date = getdate(date)
 	else:
@@ -36,8 +63,9 @@ def add_to_date(date, years=0, months=0, days=0):
 	from dateutil.relativedelta import relativedelta
 	date += relativedelta(years=years, months=months, days=days)
 
-	if format:
-		return date.strftime("%Y-%m-%d")
+	if as_string:
+		date = date.strftime("%Y-%m-%d")
+		return (date + " " + with_time) if with_time else date
 	else:
 		return date
 
@@ -89,7 +117,7 @@ def now():
 		return getdate(frappe.local.current_date).strftime("%Y-%m-%d") + " " + \
 			now_datetime().strftime('%H:%M:%S.%f')
 	else:
-		return now_datetime().strftime('%Y-%m-%d %H:%M:%S.%f')
+		return now_datetime().strftime(DATETIME_FORMAT)
 
 def nowdate():
 	"""return current date as yyyy-mm-dd"""
@@ -122,27 +150,25 @@ def get_last_day(dt):
 	"""
 	return get_first_day(dt, 0, 1) + datetime.timedelta(-1)
 
-def get_datetime(datetime_str):
-	try:
-		return datetime.datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S.%f')
 
-	except TypeError:
-		if isinstance(datetime_str, datetime.datetime):
-			return datetime_str.replace(tzinfo=None)
-		else:
-			raise
-
-	except ValueError:
-		if datetime_str=='0000-00-00 00:00:00.000000':
-			return None
-
-		return datetime.datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
+def get_time(time_str):
+	if isinstance(time_str, datetime.datetime):
+		return time_str.time()
+	elif isinstance(time_str, datetime.time):
+		return time_str
+	return parser.parse(time_str).time()
 
 def get_datetime_str(datetime_obj):
 	if isinstance(datetime_obj, basestring):
 		datetime_obj = get_datetime(datetime_obj)
 
-	return datetime_obj.strftime('%Y-%m-%d %H:%M:%S.%f')
+	return datetime_obj.strftime(DATETIME_FORMAT)
+
+def get_user_format():
+	if getattr(frappe.local, "user_format", None) is None:
+		frappe.local.user_format = frappe.db.get_default("date_format")
+
+	return frappe.local.user_format or "yyyy-mm-dd"
 
 def formatdate(string_date=None, format_string=None):
 	"""
@@ -156,21 +182,20 @@ def formatdate(string_date=None, format_string=None):
 		 * dd/mm/yyyy
 	"""
 	date = getdate(string_date) if string_date else now_datetime().date()
+	if not format_string:
+		format_string = get_user_format().replace("mm", "MM")
 
-	if format_string:
-		return babel.dates.format_date(date, format_string or "medium", locale=(frappe.local.lang or "").replace("-", "_"))
-	else:
-		if getattr(frappe.local, "user_format", None) is None:
-			frappe.local.user_format = frappe.db.get_default("date_format")
+	return babel.dates.format_date(date, format_string, locale=(frappe.local.lang or "").replace("-", "_"))
 
-		out = frappe.local.user_format or "yyyy-mm-dd"
+def format_datetime(datetime_string, format_string=None):
+	if not datetime_string:
+		return
 
-		try:
-			return out.replace("dd", date.strftime("%d"))\
-				.replace("mm", date.strftime("%m"))\
-				.replace("yyyy", date.strftime("%Y"))
-		except ValueError, e:
-			raise frappe.ValidationError, str(e)
+	datetime = get_datetime(datetime_string)
+	if not format_string:
+		format_string = get_user_format().replace("mm", "MM") + " hh:mm:ss"
+
+	return babel.dates.format_datetime(datetime, format_string, locale=(frappe.local.lang or "").replace("-", "_"))
 
 def global_date_format(date):
 	"""returns date as 1 January 2012"""
@@ -453,8 +478,8 @@ def pretty_date(iso_datetime):
 	import math
 
 	if isinstance(iso_datetime, basestring):
-		iso_datetime = datetime.datetime.strptime(iso_datetime, '%Y-%m-%d %H:%M:%S.%f')
-	now_dt = datetime.datetime.strptime(now(), '%Y-%m-%d %H:%M:%S.%f')
+		iso_datetime = datetime.datetime.strptime(iso_datetime, DATETIME_FORMAT)
+	now_dt = datetime.datetime.strptime(now(), DATETIME_FORMAT)
 	dt_diff = now_dt - iso_datetime
 
 	# available only in python 2.7+
@@ -589,10 +614,13 @@ def expand_relative_urls(html):
 
 	return re.sub('(href|src){1}([\s]*=[\s]*[\'"]?)((?!http)[^\'" >]+)([\'"]?)', _expand_relative_urls, html)
 
+def quoted(url):
+	return cstr(urllib.quote(encode(url), safe=b"~@#$&()*!+=:;,.?/'"))
+
 def quote_urls(html):
 	def _quote_url(match):
 		groups = list(match.groups())
-		groups[2] = urllib.quote(groups[2].encode("utf-8"), safe=b"~@#$&()*!+=:;,.?/'").decode("utf-8")
+		groups[2] = quoted(groups[2])
 		return "".join(groups)
 	return re.sub('(href|src){1}([\s]*=[\s]*[\'"]?)((?:http)[^\'">]+)([\'"]?)',
 		_quote_url, html)

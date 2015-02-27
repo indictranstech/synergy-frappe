@@ -10,7 +10,7 @@
   top: 41px;
   margin: auto;
   background-color: #fff;
-  z-index: 2;
+  z-index: 101;
 }
 .sub-heading {
   display: inline-block;
@@ -74,6 +74,9 @@
 }
 .page-form .checkbox input {
   margin-top: -3px;
+}
+.page-form select.input-sm {
+  line-height: 1.2em !important;
 }
 .message-page {
   padding-top: 10rem;

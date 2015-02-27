@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 app_name = "frappe"
 app_title = "Frappe Framework"
 app_publisher = "Web Notes Technologies Pvt. Ltd."
@@ -24,9 +25,14 @@ web_include_js = [
 	"website_script.js"
 ]
 
+bootstrap = "assets/frappe/css/bootstrap.css"
 web_include_css = [
 	"assets/css/frappe-web.css",
-	"style_settings.css"
+	"website_theme.css"
+]
+website_route_rules = [
+	{"from_route": "/blog", "to_route": "Blog Post"},
+	{"from_route": "/blog/<category>", "to_route": "Blog Post"}
 ]
 
 write_file_keys = ["file_url", "file_name"]

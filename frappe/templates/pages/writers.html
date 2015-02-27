@@ -6,10 +6,14 @@
 	<p>{{ writers_introduction }}</p>
 	{% endif %}
 	{% for blogger_info in bloggers %}
-	{% include "templates/includes/blogger.html" %}
-	{% if not loop.last %}<hr>{% endif %}
+	{% include "templates/includes/blog/blogger.html" %}
 	{% endfor %}
+	{% include "templates/includes/blog/blog_footer.html" %}
 </div>
 {% endblock %}
 
-{% block footer %}{% include "templates/includes/blog_footer.html" %}{% endblock %}
+{% block style %}
+<style>
+
+</style>
+{% endblock %}

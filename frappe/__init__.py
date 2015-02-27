@@ -202,21 +202,22 @@ def msgprint(msg, small=0, raise_exception=0, as_table=False):
 	:param raise_exception: [optional] Raise given exception and show message.
 	:param as_table: [optional] If `msg` is a list of lists, render as HTML table.
 	"""
+	from utils import cstr, encode
+
 	def _raise_exception():
 		if raise_exception:
 			if flags.rollback_on_exception:
 				db.rollback()
 			import inspect
 			if inspect.isclass(raise_exception) and issubclass(raise_exception, Exception):
-				raise raise_exception, msg
+				raise raise_exception, encode(msg)
 			else:
-				raise ValidationError, msg
+				raise ValidationError, encode(msg)
 
 	if flags.mute_messages:
 		_raise_exception()
 		return
 
-	from utils import cstr
 	if as_table and type(msg) in (list, tuple):
 		msg = '<table border="1px" style="border-collapse: collapse" cellpadding="2px">' + ''.join(['<tr>'+''.join(['<td>%s</td>' % c for c in r])+'</tr>' for r in msg]) + '</table>'
 
@@ -378,7 +379,7 @@ def get_user(username):
 	else:
 		return User(username)
 
-def has_permission(doctype, ptype="read", doc=None, user=None):
+def has_permission(doctype, ptype="read", doc=None, user=None, verbose=False):
 	"""Raises `frappe.PermissionError` if not permitted.
 
 	:param doctype: DocType for which permission is to be check.
@@ -386,7 +387,23 @@ def has_permission(doctype, ptype="read", doc=None, user=None):
 	:param doc: [optional] Checks User permissions for given doc.
 	:param user: [optional] Check for given user. Default: current user."""
 	import frappe.permissions
-	return frappe.permissions.has_permission(doctype, ptype, doc, user=user)
+	return frappe.permissions.has_permission(doctype, ptype, doc, verbose=verbose, user=user)
+
+def has_website_permission(doctype, ptype="read", doc=None, user=None, verbose=False):
+	"""Raises `frappe.PermissionError` if not permitted.
+
+	:param doctype: DocType for which permission is to be check.
+	:param ptype: Permission type (`read`, `write`, `create`, `submit`, `cancel`, `amend`). Default: `read`.
+	:param doc: Checks User permissions for given doc.
+	:param user: [optional] Check for given user. Default: current user."""
+
+	if not user: user = session.user
+
+	for method in get_hooks("has_website_permission").get(doctype, []):
+		if not call(get_attr(method), doc=doc, ptype=ptype, user=user, verbose=verbose):
+			return False
+
+	return True
 
 def is_table(doctype):
 	"""Returns True if `istable` property (indicating child Table) is set for given DocType."""
@@ -440,6 +457,14 @@ def get_doc(arg1, arg2=None):
 	"""
 	import frappe.model.document
 	return frappe.model.document.get_doc(arg1, arg2)
+
+def get_last_doc(doctype):
+	"""Get last created document of this type."""
+	d = get_all(doctype, ["name"], order_by="creation desc", limit_page_length=1)
+	if d:
+		return get_doc(doctype, d[0].name)
+	else:
+		raise DoesNotExistError
 
 def get_single(doctype):
 	"""Return a `frappe.model.document.Document` object of the given Single doctype."""
@@ -736,6 +761,7 @@ def copy_doc(doc, ignore_no_copy=True):
 		d = doc
 
 	newdoc = get_doc(copy.deepcopy(d))
+
 	newdoc.name = None
 	newdoc.set("__islocal", 1)
 	newdoc.owner = None
@@ -842,6 +868,8 @@ def get_all(doctype, *args, **kwargs):
 		frappe.get_all("ToDo", fields=["*"], filters = {"description": ("like", "test%")})
 	"""
 	kwargs["ignore_permissions"] = True
+	if not "limit_page_length" in kwargs:
+		kwargs["limit_page_length"] = 0
 	return get_list(doctype, *args, **kwargs)
 
 def add_version(doc):

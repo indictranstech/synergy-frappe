@@ -139,3 +139,18 @@
 .attach-image-display {
   cursor: pointer;
 }
+@media (min-width: 768px) {
+  .layout-main .form-column.col-sm-12 > form > .input-max-width {
+    max-width: 50%;
+    padding-right: 15px;
+  }
+  .col-sm-6 .form-grid .form-column.col-sm-12 > form > .input-max-width {
+    max-width: none;
+    padding-right: 0px;
+  }
+}
+select.form-control {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}

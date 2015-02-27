@@ -25,10 +25,6 @@ def get_context(path):
 
 	if not context:
 		context = get_route_info(path)
-
-		# permission may be required for rendering
-		context["access"] = frappe._dict({"public_read":1, "public_write":1})
-
 		context = build_context(context)
 		add_data_path(context)
 
@@ -36,21 +32,21 @@ def get_context(path):
 			frappe.cache().set_value(cache_key, context)
 
 	else:
-		context["access"] = frappe._dict({"public_read":1, "public_write":1})
 		add_data_path(context)
 
 	context.update(context.data or {})
 
 	return context
 
-def build_context(sitemap_options):
+def build_context(context):
 	"""get_context method of doc or module is supposed to render content templates and push it into context"""
-	context = frappe._dict(sitemap_options)
+	context = frappe._dict(context)
 	context.update(get_website_settings())
 
 	# provide doc
 	if context.doc:
 		context.update(context.doc.as_dict())
+		context.update(context.doc.website)
 		if hasattr(context.doc, "get_context"):
 			ret = context.doc.get_context(context)
 			if ret:
@@ -64,14 +60,27 @@ def build_context(sitemap_options):
 		module = frappe.get_module(context.controller)
 
 		if module:
+			# get config fields
+			for prop in ("base_template_path", "template", "no_cache", "no_sitemap",
+				"condition_field"):
+				if hasattr(module, prop):
+					context[prop] = getattr(module, prop)
+
 			if hasattr(module, "get_context"):
 				ret = module.get_context(context)
 				if ret:
 					context.update(ret)
+
 			if hasattr(module, "get_children"):
 				context.children = module.get_children(context)
 
 	add_metatags(context)
+	context.update(frappe.get_hooks("website_context") or {})
+
+	# determine templates to be used
+	if not context.base_template_path:
+		app_base = frappe.get_hooks("base_template")
+		context.base_template_path = app_base[0] if app_base else "templates/base.html"
 
 	if context.get("base_template_path") != context.get("template") and not context.get("rendered"):
 		context.data = render_blocks(context)
@@ -91,5 +100,4 @@ def add_metatags(context):
 			tags["og:description"] = tags["twitter:description"] = tags["description"]
 		if tags.get("image"):
 			tags["og:image"] = tags["twitter:image:src"] = tags["image"]
-
 

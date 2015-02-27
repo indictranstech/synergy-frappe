@@ -8,7 +8,7 @@ import frappe, json
 import frappe.defaults
 import frappe.share
 import frappe.permissions
-from frappe.utils import flt
+from frappe.utils import flt, cint, getdate, get_datetime, get_time
 from frappe import _
 
 class DatabaseQuery(object):
@@ -22,8 +22,8 @@ class DatabaseQuery(object):
 		self.flags = frappe._dict()
 
 	def execute(self, query=None, fields=None, filters=None, or_filters=None,
-		docstatus=None, group_by=None, order_by=None, limit_start=0,
-		limit_page_length=20, as_list=False, with_childnames=False, debug=False,
+		docstatus=None, group_by=None, order_by=None, limit_start=False,
+		limit_page_length=None, as_list=False, with_childnames=False, debug=False,
 		ignore_permissions=False, user=None):
 		if not ignore_permissions and not frappe.has_permission(self.doctype, "read", user=user):
 			raise frappe.PermissionError, self.doctype
@@ -35,8 +35,8 @@ class DatabaseQuery(object):
 		self.docstatus = docstatus or []
 		self.group_by = group_by
 		self.order_by = order_by
-		self.limit_start = int(limit_start) if limit_start else 0
-		self.limit_page_length = int(limit_page_length) if limit_page_length else 20
+		self.limit_start = 0 if (limit_start is False) else cint(limit_start)
+		self.limit_page_length = cint(limit_page_length) if limit_page_length else None
 		self.with_childnames = with_childnames
 		self.debug = debug
 		self.as_list = as_list
@@ -217,9 +217,22 @@ class DatabaseQuery(object):
 						tname=tname, fname=f[1], operator=f[2], value=f[3]))
 				else:
 					df = frappe.get_meta(f[0]).get("fields", {"fieldname": f[1]})
+					df = df[0] if df else None
 
-					if f[2] == "like" or (isinstance(f[3], basestring) and
-						(not df or df[0].fieldtype not in ["Float", "Int", "Currency", "Percent", "Check"])):
+					if df and df.fieldtype=="Date":
+						value, default_val = '"{0}"'.format(frappe.db.escape(getdate(f[3]).strftime("%Y-%m-%d"))), \
+							"'0000-00-00'"
+
+					elif df and df.fieldtype=="Datetime":
+						value, default_val = '"{0}"'.format(frappe.db.escape(get_datetime(f[3]).strftime("%Y-%m-%d %H:%M:%S.%f"))), \
+							"'0000-00-00 00:00:00'"
+
+					elif df and df.fieldtype=="Time":
+						value, default_val = '"{0}"'.format(frappe.db.escape(get_time(f[3]).strftime("%H:%M:%S.%f"))), \
+							"'00:00:00'"
+
+					elif f[2] == "like" or (isinstance(f[3], basestring) and
+						(not df or df.fieldtype not in ["Float", "Int", "Currency", "Percent", "Check"])):
 							if f[2] == "like":
 								# because "like" uses backslash (\) for escaping
 								f[3] = f[3].replace("\\", "\\\\")

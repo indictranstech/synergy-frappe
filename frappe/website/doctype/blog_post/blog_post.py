@@ -4,20 +4,21 @@
 from __future__ import unicode_literals
 
 import frappe, re
-
+from frappe import _
 from frappe.website.website_generator import WebsiteGenerator
 from frappe.website.render import clear_cache
 from frappe.utils import today, cint, global_date_format, get_fullname
 from frappe.website.utils import find_first_image, get_comment_list
-from frappe.templates.pages.blog import get_children
 
 class BlogPost(WebsiteGenerator):
-	condition_field = "published"
-	template = "templates/generators/blog_post.html"
 	save_versions = True
-	order_by = "published_on desc"
-	parent_website_route_field = "blog_category"
-	page_title_field = "title"
+	website = frappe._dict(
+		condition_field = "published",
+		template = "templates/generators/blog_post.html",
+		order_by = "published_on desc",
+		parent_website_route_field = "blog_category",
+		page_title_field = "title"
+	)
 
 	def get_feed(self):
 		return self.title
@@ -67,12 +68,43 @@ class BlogPost(WebsiteGenerator):
 		if image:
 			context.metatags["image"] = image
 
-		context.categories = frappe.db.sql_list("""select name from
-			`tabBlog Category` order by name""")
-
 		context.comment_list = get_comment_list(self.doctype, self.name)
 
 		context.children = get_children()
+
+		category = frappe.db.get_value("Blog Category", context.doc.blog_category, ["title", "page_name"], as_dict=1)
+		context.parents = [{"title": category.title, "name": "blog/{0}".format(category.page_name)}]
+
+	@staticmethod
+	def get_list_context(context=None):
+		list_context = frappe._dict(
+			page_title = _("Blog"),
+			template = "templates/includes/blog/blog.html",
+			row_template = "templates/includes/blog/blog_row.html",
+			get_list = get_blog_list,
+			hide_filters = True,
+			children = get_children()
+		)
+
+		if frappe.local.form_dict.category:
+			list_context.blog_subtitle = _("Posts filed under {0}").format(get_blog_category(frappe.local.form_dict.category))
+			list_context.parents = [{ "name": "blog", "title": _("Blog") }]
+
+		elif frappe.local.form_dict.by:
+			blogger = frappe.db.get_value("Blogger", {"name": frappe.local.form_dict.by}, "full_name")
+			list_context.blog_subtitle = _("Posts by {0}").format(blogger)
+			list_context.parents = [{ "name": "blog", "title": _("Blog") }]
+
+		list_context.update(frappe.get_doc("Blog Settings", "Blog Settings").as_dict())
+		return list_context
+
+def get_children():
+	return frappe.db.sql("""select concat("blog/", page_name) as name,
+		title from `tabBlog Category`
+		where ifnull(published, 0) = 1
+		and exists (select name from `tabBlog Post`
+			where `tabBlog Post`.blog_category=`tabBlog Category`.name and ifnull(published, 0)=1)
+		order by title asc""", as_dict=1)
 
 def clear_blog_cache():
 	for blog in frappe.db.sql_list("""select page_name from
@@ -81,3 +113,57 @@ def clear_blog_cache():
 
 	clear_cache("writers")
 
+def get_blog_category(page_name):
+	return frappe.db.get_value("Blog Category", {"page_name": page_name }) or page_name
+
+def get_blog_list(doctype, txt=None, filters=None, limit_start=0, limit_page_length=20):
+	condition = ""
+	if filters:
+		if filters.by:
+			condition = ' and t1.blogger="%s"' % filters.by
+		if filters.category:
+			condition += ' and t1.blog_category="%s"' % get_blog_category(filters.category)
+
+		if condition:
+			frappe.local.no_cache = 1
+
+	query = """\
+		select
+			t1.title, t1.name,
+				concat(t1.parent_website_route, "/", t1.page_name) as page_name,
+				t1.published_on as creation,
+				day(t1.published_on) as day, monthname(t1.published_on) as month,
+				year(t1.published_on) as year,
+				ifnull(t1.blog_intro, t1.content) as content,
+				t2.full_name, t2.avatar, t1.blogger,
+				(select count(name) from `tabComment` where
+					comment_doctype='Blog Post' and comment_docname=t1.name) as comments
+		from `tabBlog Post` t1, `tabBlogger` t2
+		where ifnull(t1.published,0)=1
+		and t1.blogger = t2.name
+		%(condition)s
+		order by published_on desc, name asc
+		limit %(start)s, %(page_len)s""" % {
+			"start": limit_start, "page_len": limit_page_length, "condition": condition
+		}
+
+	posts = frappe.db.sql(query, as_dict=1)
+
+	for post in posts:
+		post.published = global_date_format(post.creation)
+		post.content = re.sub('\<[^>]*\>', '', post.content[:140])
+		if not post.comments:
+			post.comment_text = _('No comments yet')
+		elif post.comments==1:
+			post.comment_text = _('1 comment')
+		else:
+			post.comment_text = _('{0} comments').format(str(post.comments))
+
+		post.avatar = post.avatar or ""
+
+		if (not "http:" in post.avatar or "https:" in post.avatar) and not post.avatar.startswith("/"):
+			post.avatar = "/" + post.avatar
+
+		post.month = post.month.upper()[:3]
+
+	return posts

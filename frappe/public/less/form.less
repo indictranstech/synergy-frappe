@@ -19,7 +19,7 @@
 .form-inner-toolbar {
 	padding: 10px 15px;
 	background-color: @light-bg;
-	//border-bottom: 1px solid @border-color;
+	// border-bottom: 1px dashed @border-color;
 	text-align: right;
 }
 
@@ -107,9 +107,9 @@
 }
 
 .timeline-item .reply {
-    margin-top: 5px;
-    // padding-left: 24px;
-    // border-left: 8px solid #d8dfe6;
+	margin-top: 5px;
+	// padding-left: 24px;
+	// border-left: 8px solid #d8dfe6;
 }
 
 .timeline-item h6, .timeline-head h6 {
@@ -178,4 +178,23 @@
 .attach-missing-image,
 .attach-image-display {
 	cursor: pointer;
+}
+
+@media (min-width: 768px) {
+	.layout-main .form-column.col-sm-12 > form > .input-max-width {
+		max-width: 50%;
+		padding-right: 15px;
+	}
+
+	// don't max-width when in form-grid with half width
+	.col-sm-6 .form-grid .form-column.col-sm-12 > form > .input-max-width {
+		max-width: none;
+		padding-right: 0px;
+	}
+}
+
+select.form-control {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
 }
