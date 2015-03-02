@@ -126,14 +126,14 @@ class Document(BaseDocument):
 		if not self.has_permission(permtype):
 			self.raise_no_permission_to(permlabel or permtype)
 
-	def has_permission(self, permtype="read"):
+	def has_permission(self, permtype="read", verbose=False):
 		"""Call `frappe.has_permission` if `self.flags.ignore_permissions`
 		is not set.
 
 		:param permtype: one of `read`, `write`, `submit`, `cancel`, `delete`"""
 		if self.flags.ignore_permissions:
 			return True
-		return frappe.has_permission(self.doctype, permtype, self)
+		return frappe.has_permission(self.doctype, permtype, self, verbose=verbose)
 
 	def raise_no_permission_to(self, perm_type):
 		"""Raise `frappe.PermissionError`."""
@@ -222,6 +222,12 @@ class Document(BaseDocument):
 		else:
 			self.db_update()
 
+		self.update_children()
+		self.run_post_save_methods()
+
+		return self
+
+	def update_children(self):
 		# children
 		child_map = {}
 		ignore_children_type = self.flags.ignore_children_type or []
@@ -240,10 +246,6 @@ class Document(BaseDocument):
 				else:
 					frappe.db.sql("""delete from `tab%s` where parent=%s and parenttype=%s""" \
 						% (df.options, '%s', '%s'), (self.name, self.doctype))
-
-		self.run_post_save_methods()
-
-		return self
 
 	def set_new_name(self):
 		"""Calls `frappe.naming.se_new_name` for parent and child docs."""
@@ -404,6 +406,9 @@ class Document(BaseDocument):
 
 		for fieldname, msg in missing:
 			msgprint(msg)
+
+		if frappe.flags.print_messages:
+			print self.as_dict()
 
 		raise frappe.MandatoryError(", ".join((each[0] for each in missing)))
 

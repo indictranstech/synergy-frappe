@@ -66,16 +66,25 @@ frappe.ui.TagEditor = Class.extend({
 	refresh: function(user_tags) {
 		var me = this;
 
+		if(!me.initialized || me.refreshing)
+			return;
+
 		me.refreshing = true;
-		me.$tags.tagit("removeAll");
+		try {
+			me.$tags.tagit("removeAll");
 
-		if(!user_tags && this.frm)
-			user_tags = frappe.model.get_value(this.frm.doctype, this.frm.docname, "_user_tags");
+			if(!user_tags && this.frm)
+				user_tags = frappe.model.get_value(this.frm.doctype, this.frm.docname, "_user_tags");
 
-		if(user_tags) {
-			$.each(user_tags.split(','), function(i, v) {
-				me.$tags.tagit("createTag", v);
-			});
+			if(user_tags) {
+				$.each(user_tags.split(','), function(i, v) {
+					me.$tags.tagit("createTag", v);
+				});
+			}
+		} catch(e) {
+			me.refreshing = false;
+			// wtf bug
+			setTimeout( function() { me.refresh(); }, 100);
 		}
 		me.refreshing = false;
 

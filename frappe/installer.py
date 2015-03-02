@@ -18,8 +18,8 @@ from frappe.website import render, statics
 
 def install_db(root_login="root", root_password=None, db_name=None, source_sql=None,
 	admin_password=None, verbose=True, force=0, site_config=None, reinstall=False):
-	frappe.flags.in_install_db = True
 	make_conf(db_name, site_config=site_config)
+	frappe.flags.in_install_db = True
 	if reinstall:
 		frappe.connect(db_name=db_name)
 		dbman = DbManager(frappe.local.db)
@@ -217,7 +217,7 @@ def add_module_defs(app):
 		d.save()
 
 def remove_missing_apps():
-	apps = ('frappe_subscription',)
+	apps = ('frappe_subscription', 'shopping_cart')
 	installed_apps = frappe.get_installed_apps()
 	for app in apps:
 		if app in installed_apps:

@@ -211,7 +211,8 @@ class BaseDocument(object):
 		return frappe._dict(doc)
 
 	def as_json(self):
-		return json.dumps(self.as_dict(), indent=1, sort_keys=True)
+		from frappe.utils.response import json_handler
+		return json.dumps(self.as_dict(), indent=1, sort_keys=True, default=json_handler)
 
 	def get_table_field_doctype(self, fieldname):
 		return self.meta.get_field(fieldname).options
@@ -221,7 +222,10 @@ class BaseDocument(object):
 		return fieldname[0] if fieldname else None
 
 	def db_insert(self):
-		set_new_name(self)
+		"""INSERT the document (with valid columns) in the database."""
+		if not self.name:
+			# name will be set by document class in most cases
+			set_new_name(self)
 		d = self.get_valid_dict()
 		columns = d.keys()
 		try:
@@ -234,6 +238,7 @@ class BaseDocument(object):
 		except Exception, e:
 			if e.args[0]==1062:
 				if self.meta.autoname=="hash":
+					self.name = None
 					self.db_insert()
 					return
 				type, value, traceback = sys.exc_info()
@@ -427,8 +432,13 @@ class BaseDocument(object):
 
 	def get_formatted(self, fieldname, doc=None, currency=None):
 		from frappe.utils.formatters import format_value
-		return format_value(self.get(fieldname), self.meta.get_field(fieldname),
-			doc=doc or self, currency=currency)
+
+		df = self.meta.get_field(fieldname)
+		if not df and fieldname in default_fields:
+			from frappe.model.meta import get_default_df
+			df = get_default_df(fieldname)
+
+		return format_value(self.get(fieldname), df=df, doc=doc or self, currency=currency)
 
 	def is_print_hide(self, fieldname, for_print=True):
 		"""Returns true if fieldname is to be hidden for print.

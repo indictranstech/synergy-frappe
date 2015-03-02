@@ -5,12 +5,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe.website.website_generator import WebsiteGenerator
 from frappe.website.render import clear_cache
-from frappe.templates.pages.blog import get_context
 
 class BlogCategory(WebsiteGenerator):
-	page_title_field = "title"
-	template = "templates/generators/blog_category.html"
-	no_cache = True
 	def autoname(self):
 		# to override autoname of WebsiteGenerator
 		self.name = self.category_name
@@ -22,8 +18,3 @@ class BlogCategory(WebsiteGenerator):
 	def validate(self):
 		self.parent_website_route = "blog"
 		super(BlogCategory, self).validate()
-
-	def get_context(self, context):
-		"""Build context from `frappe.templates.pages.blog`"""
-		context.category = self.name
-		get_context(context)

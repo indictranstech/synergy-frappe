@@ -54,7 +54,7 @@ frappe.form.formatters = {
 			? "" : format_currency(value, currency, docfield.precision || null), options);
 	},
 	Check: function(value) {
-		return value ? "<i class='icon-check'></i>" : "<i class='icon-check-empty'></i>";
+		return value ? "<i class='icon-ok'></i>" : "<i class='icon-remove'></i>";
 	},
 	Link: function(value, docfield, options) {
 		var doctype = docfield._options || docfield.options;
@@ -78,6 +78,9 @@ frappe.form.formatters = {
 	Date: function(value) {
 		return value ? dateutil.str_to_user(value) : "";
 	},
+	Datetime: function(value) {
+		return value ? dateutil.str_to_user(value) : "";
+	},
 	Text: function(value) {
 		if(value) {
 			var tags = ["<p", "<div", "<br"];
@@ -91,7 +94,7 @@ frappe.form.formatters = {
 			}
 
 			if(!match) {
-				return replace_newlines(value);
+				value = replace_newlines(value);
 			}
 		}
 
@@ -101,7 +104,7 @@ frappe.form.formatters = {
 		var html = "";
 		$.each(JSON.parse(value || "[]"), function(i, v) {
 			if(v) html+= '<span class="avatar avatar-small" \
-				style="margin-right: 3px;"><img src="'+frappe.user_info(v).image+'"></span>';
+				style="margin-right: 3px;"><img src="'+frappe.user_info(v).image+'" alt="'+ frappe.user_info(v).abbr +'"></span>';
 		});
 		return html;
 	},
@@ -136,7 +139,7 @@ frappe.form.formatters = {
 		return frappe.form.formatters.Text(value);
 	},
 	TextEditor: function(value) {
-		return frappe.form.formatters.Text(frappe.utils.remove_script_and_style(value));
+		return frappe.form.formatters.Text(value);
 	},
 	Code: function(value) {
 		return "<pre>" + (value==null ? "" : $("<div>").text(value).html()) + "</pre>"
@@ -176,7 +179,12 @@ frappe.format = function(value, df, options, doc) {
 
 	formatter = df.formatter || frappe.form.get_formatter(fieldtype);
 
-	return formatter(value, df, options, doc);
+	var formatted = formatter(value, df, options, doc);
+
+	if (typeof formatted == "string")
+		formatted = frappe.utils.remove_script_and_style(formatted);
+
+	return formatted;
 }
 
 frappe.get_format_helper = function(doc) {

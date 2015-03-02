@@ -11,6 +11,11 @@
   padding: 10px 0px;
   border-bottom: 1px solid #d1d8dd;
 }
+.form-inner-toolbar {
+  padding: 10px 15px;
+  background-color: #fafbfc;
+  text-align: right;
+}
 .form-clickable-section {
   border-top: 1px solid #d1d8dd;
   padding: 10px 15px;
@@ -27,7 +32,10 @@
   margin: 0px;
   padding: 15px;
 }
-.form-section:nth-child(even),
+.empty-section {
+  display: none !important;
+}
+.shaded-section,
 .timeline-item:nth-child(even) {
   background-color: #fafbfc;
 }
@@ -112,6 +120,9 @@
 .frappe-control .help-box {
   margin-top: 3px;
 }
+.hide-control {
+  display: none !important;
+}
 .shared-user {
   margin-bottom: 10px;
 }
@@ -127,4 +138,19 @@
 .attach-missing-image,
 .attach-image-display {
   cursor: pointer;
+}
+@media (min-width: 768px) {
+  .layout-main .form-column.col-sm-12 > form > .input-max-width {
+    max-width: 50%;
+    padding-right: 15px;
+  }
+  .col-sm-6 .form-grid .form-column.col-sm-12 > form > .input-max-width {
+    max-width: none;
+    padding-right: 0px;
+  }
+}
+select.form-control {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
 }

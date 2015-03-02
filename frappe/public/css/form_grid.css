@@ -71,6 +71,7 @@
 .grid-row-open .form-in-grid {
   opacity: 1;
   height: auto;
+  overflow: visible;
 }
 .grid-form-heading {
   padding: 10px 15px;
@@ -94,4 +95,8 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   padding-right: 0px;
+}
+.grid-label {
+  margin-right: 8px;
+  margin-bottom: 4px;
 }

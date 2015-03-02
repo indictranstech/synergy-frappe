@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from frappe import _
 from frappe.desk.moduleview import add_setup_section
 
@@ -164,7 +165,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Print Format",
-					"description": _("Customized HTML Templates for printing transctions.")
+					"description": _("Customized HTML Templates for printing transactions.")
 				},
 			]
 		},

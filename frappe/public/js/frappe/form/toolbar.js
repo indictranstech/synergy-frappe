@@ -38,6 +38,9 @@ frappe.ui.form.Toolbar = Class.extend({
 		}
 		var me = this;
 		this.page.set_title(title);
+		if(this.frm.meta.title_field) {
+			document.title = title + " - " + this.frm.docname;
+		}
 		this.set_indicator();
 	},
 	get_dropdown_menu: function(label) {
@@ -101,7 +104,7 @@ frappe.ui.form.Toolbar = Class.extend({
 		}
 
 		// New
-		if(p[CREATE]) {
+		if(p[CREATE] && !this.frm.meta.issingle) {
 			this.page.add_menu_item(__("New {0}", [__(me.frm.doctype)]), function() {
 				new_doc(me.frm.doctype);}, true);
 		}

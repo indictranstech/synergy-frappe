@@ -1,5 +1,6 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
+from __future__ import unicode_literals
 
 import sys, os
 import json
@@ -118,6 +119,10 @@ def init_site(request):
 def make_form_dict(request):
 	frappe.local.form_dict = frappe._dict({ k:v[0] if isinstance(v, (list, tuple)) else v \
 		for k, v in (request.form or request.args).iteritems() })
+
+	if "_" in frappe.local.form_dict:
+		# _ is passed by $.ajax so that the request is not cached by the browser. So, remove _ from form_dict
+		frappe.local.form_dict.pop("_")
 
 application = local_manager.make_middleware(application)
 

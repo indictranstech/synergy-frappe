@@ -104,14 +104,15 @@ frappe.utils = {
 			me.intro_area = $('<div class="intro-area">')
 				.prependTo(wrapper);
 		}
-		if(!indicator) {
-			indicator = "grey";
-		}
 		if(txt) {
 			if(!append) {
 				me.intro_area.empty();
 			}
-			me.intro_area.html('<div class="indicator '+indicator+'">'+txt+'</div>')
+			if(indicator) {
+				me.intro_area.html('<div class="indicator '+indicator+'">'+txt+'</div>')
+			} else {
+				me.intro_area.html('<p class="text-muted">'+txt+'</div>')
+			}
 		} else {
 			me.intro_area.remove();
 			me.intro_area = null;
@@ -402,5 +403,9 @@ frappe.utils = {
 
         // Return the parsed data.
         return( arrData );
-    }
+    },
+
+	warn_page_name_change: function(frm) {
+		frappe.msgprint("Note: Changing the Page Name will break previous URL to this page.");
+	},
 };

@@ -98,8 +98,6 @@ _f.Frm.prototype.setup = function() {
 		page: this.page
 	});
 
-	this.frm_head = this.toolbar;
-
 	// print layout
 	this.setup_print_layout();
 
@@ -128,26 +126,29 @@ _f.Frm.prototype.setup_drag_drop = function() {
 	var me = this;
 	$(this.wrapper).on('dragenter dragover', false)
 		.on('drop', function (e) {
+			var dataTransfer = e.originalEvent.dataTransfer;
+			if (!(dataTransfer && dataTransfer.files && dataTransfer.files.length > 0)) {
+				return;
+			}
+
 			e.stopPropagation();
 			e.preventDefault();
+
 			if(me.doc.__islocal) {
 				msgprint(__("Please save before attaching."));
-				return false;
 				throw "attach error";
 			}
+
 			if(me.attachments.max_reached()) {
 				msgprint(__("Maximum Attachment Limit for this record reached."));
 				throw "attach error";
 			}
 
-			var dataTransfer = e.originalEvent.dataTransfer;
-			if (dataTransfer && dataTransfer.files && dataTransfer.files.length > 0) {
-				frappe.upload.upload_file(dataTransfer.files[0], me.attachments.get_args(), {
-					callback: function(attachment, r) {
-						me.attachments.attachment_uploaded(attachment, r);
-					}
-				});
-			}
+			frappe.upload.upload_file(dataTransfer.files[0], me.attachments.get_args(), {
+				callback: function(attachment, r) {
+					me.attachments.attachment_uploaded(attachment, r);
+				}
+			});
 		});
 }
 
@@ -216,14 +217,10 @@ _f.Frm.prototype.watch_model_updates = function() {
 	});
 }
 
-_f.Frm.prototype.onhide = function() {
-	if(_f.cur_grid_cell) _f.cur_grid_cell.grid.cell_deselect();
-}
-
 _f.Frm.prototype.setup_std_layout = function() {
 	this.form_wrapper = $('<div></div>').appendTo(this.layout_main);
-	this.body_header	= $("<div>").appendTo(this.form_wrapper);
-	this.body 			= $("<div>").appendTo(this.form_wrapper);
+	this.inner_toolbar	= $('<div class="form-inner-toolbar hide"></div>').appendTo(this.form_wrapper);
+	this.body 			= $('<div></div>').appendTo(this.form_wrapper);
 
 	// only tray
 	this.meta.section_style='Simple'; // always simple!
@@ -308,11 +305,6 @@ _f.Frm.prototype.setup_meta = function(doctype) {
 	if(this.meta.istable) { this.meta.in_dialog = 1 }
 }
 
-_f.Frm.prototype.defocus_rest = function() {
-	// deselect others
-	if(_f.cur_grid_cell) _f.cur_grid_cell.grid.cell_deselect();
-}
-
 _f.Frm.prototype.refresh_header = function() {
 	// set title
 	// main title
@@ -324,9 +316,11 @@ _f.Frm.prototype.refresh_header = function() {
 		frappe.ui.toolbar.recent.add(this.doctype, this.docname, 1);
 
 	// show / hide buttons
-	if(this.frm_head) {
-		this.frm_head.refresh();
+	if(this.toolbar) {
+		this.toolbar.refresh();
 	}
+
+	this.clear_custom_buttons();
 
 	this.show_web_link();
 }
@@ -493,6 +487,7 @@ _f.Frm.prototype.setnewdoc = function() {
 	// this.check_doctype_conflict(docname);
 	var me = this;
 
+	// hide any open grid
 	this.script_manager.trigger("before_load", this.doctype, this.docname, function() {
 		me.script_manager.trigger("onload");
 		me.opendocs[me.docname] = true;
@@ -562,6 +557,9 @@ _f.Frm.prototype.save = function(save_action, callback, btn, on_error) {
 	btn && $(btn).prop("disabled", true);
 	$(document.activeElement).blur();
 
+	var open_form = frappe.ui.form.get_open_grid_form();
+	open_form && open_form.hide_form();
+
 	// let any pending js process finish
 	var me = this;
 	setTimeout(function() { me._save(save_action, callback, btn, on_error) }, 100);
@@ -575,20 +573,9 @@ _f.Frm.prototype._save = function(save_action, callback, btn, on_error) {
 	if((!this.meta.in_dialog || this.in_form) && !this.meta.istable)
 		scroll(0, 0);
 
-	if(save_action != "Update") {
-		// validate
-		validated = true;
-		this.script_manager.trigger("validate");
-
-		if(!validated) {
-			if(on_error)
-				on_error();
-			return;
-		}
-	}
-
 	var after_save = function(r) {
 		if(!r.exc) {
+			me.script_manager.trigger("after_save");
 			me.refresh();
 		} else {
 			if(on_error)
@@ -606,7 +593,25 @@ _f.Frm.prototype._save = function(save_action, callback, btn, on_error) {
 		}
 	}
 
-	frappe.ui.form.save(me, save_action, after_save, btn);
+	if(save_action != "Update") {
+		// validate
+		validated = true;
+		$.when(this.script_manager.trigger("validate"), this.script_manager.trigger("before_save"))
+			.done(function() {
+				// done is called after all ajaxes in validate & before_save are completed :)
+
+				if(!validated) {
+					if(on_error)
+						on_error();
+					return;
+				}
+
+				frappe.ui.form.save(me, save_action, after_save, btn);
+			});
+
+	} else {
+		frappe.ui.form.save(me, save_action, after_save, btn);
+	}
 }
 
 
@@ -615,19 +620,20 @@ _f.Frm.prototype.savesubmit = function(btn, callback, on_error) {
 	this.validate_form_action("Submit");
 	frappe.confirm(__("Permanently Submit {0}?", [this.docname]), function() {
 		validated = true;
-		me.script_manager.trigger("before_submit");
-		if(!validated) {
-			if(on_error)
-				on_error();
-			return;
-		}
-
-		me.save('Submit', function(r) {
-			if(!r.exc) {
-				callback && callback();
-				me.script_manager.trigger("on_submit");
+		me.script_manager.trigger("before_submit").done(function() {
+			if(!validated) {
+				if(on_error)
+					on_error();
+				return;
 			}
-		}, btn, on_error);
+
+			me.save('Submit', function(r) {
+				if(!r.exc) {
+					callback && callback();
+					me.script_manager.trigger("on_submit");
+				}
+			}, btn, on_error);
+		});
 	});
 };
 
@@ -636,23 +642,24 @@ _f.Frm.prototype.savecancel = function(btn, callback, on_error) {
 	this.validate_form_action('Cancel');
 	frappe.confirm(__("Permanently Cancel {0}?", [this.docname]), function() {
 		validated = true;
-		me.script_manager.trigger("before_cancel");
-		if(!validated) {
-			if(on_error)
-				on_error();
-			return;
-		}
-
-		var after_cancel = function(r) {
-			if(!r.exc) {
-				me.refresh();
-				callback && callback();
-				me.script_manager.trigger("after_cancel");
-			} else {
-				on_error();
+		me.script_manager.trigger("before_cancel").done(function() {
+			if(!validated) {
+				if(on_error)
+					on_error();
+				return;
 			}
-		}
-		frappe.ui.form.save(me, "cancel", after_cancel, btn);
+
+			var after_cancel = function(r) {
+				if(!r.exc) {
+					me.refresh();
+					callback && callback();
+					me.script_manager.trigger("after_cancel");
+				} else {
+					on_error();
+				}
+			}
+			frappe.ui.form.save(me, "cancel", after_cancel, btn);
+		});
 	});
 }
 
@@ -748,10 +755,13 @@ _f.Frm.prototype.set_footnote = function(txt) {
 
 
 _f.Frm.prototype.add_custom_button = function(label, fn, icon, toolbar_or_class) {
-	this.page.add_menu_item(label, fn);
+	return $('<button class="btn btn-default btn-xs" style="margin-left: 10px;">'+__(label)+'</btn>')
+		.on("click", fn).appendTo(this.inner_toolbar.removeClass("hide"))
+	//return this.page.add_menu_item(label, fn);
 }
 
 _f.Frm.prototype.clear_custom_buttons = function() {
+	this.inner_toolbar.empty().addClass("hide");
 	this.page.clear_user_actions();
 }
 

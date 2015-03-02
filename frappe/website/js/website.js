@@ -192,7 +192,7 @@ $.extend(frappe, {
 			$(".btn-login-area").toggle(false);
 			$(".logged-in").toggle(true);
 			$(".full-name").html(frappe.get_cookie("full_name"));
-			$(".user-picture").attr("src", frappe.get_cookie("user_image"));
+			$(".user-image").attr("src", frappe.get_cookie("user_image"));
 		}
 	},
 	setup_push_state: function() {
@@ -421,13 +421,13 @@ $.extend(frappe, {
 		$(".page-sidebar, .toggle-sidebar").toggleClass("hide", !sidebar_has_content);
 
 		// push sidebar to the right if there is content
-		$(".page-sidebar").toggleClass("col-sm-push-" + frappe.page_cols, sidebar_has_content);
+		// $(".page-sidebar").toggleClass("col-sm-push-" + frappe.page_cols, sidebar_has_content);
 
 		// make page content wide if no sidebar
 		$(".page-content").toggleClass("col-sm-12", !sidebar_has_content);
 
 		// narrow page content if sidebar
-		$(".page-content").toggleClass("col-sm-"+frappe.page_cols+" col-sm-pull-"+frappe.sidebar_cols, sidebar_has_content);
+		$(".page-content").toggleClass("col-sm-"+frappe.page_cols, sidebar_has_content);
 
 		// no borders if no sidebars
 		$(".page-content").toggleClass("no-border", !sidebar_has_content);
@@ -435,17 +435,6 @@ $.extend(frappe, {
 		// if everything in the sub-header is hidden, hide the sub-header
 		// var hide_sub_header = $(".page-sub-header .row").children().length === $(".page-sub-header .row").find(".hidden").length;
 		// $(".page-sub-header").toggleClass("hidden", hide_sub_header);
-
-
-		// collapse sidebar in mobile view on page change
-		if(!$(".page-sidebar").hasClass("hidden-xs")) {
-			$(".toggle-sidebar").trigger("click");
-		}
-
-		// TODO add private pages to sidebar
-		// if(website.private_pages && $(".page-sidebar").length) {
-		// 	$(website.private_pages).prependTo(".page-sidebar");
-		// }
 	}
 });
 
@@ -468,6 +457,36 @@ function get_url_arg(name) {
 		return "";
 	else
 		return decodeURIComponent(results[1]);
+}
+
+function get_query_params() {
+	var query_params = {};
+	var query_string = location.search.substring(1);
+	var query_list = query_string.split("&");
+	for (var i=0, l=query_list.length; i < l; i++ ){
+		var pair = query_list[i].split("=");
+		var key = pair[0];
+		if (!key) {
+			continue;
+		}
+
+		var value = pair[1];
+		if (typeof value === "string") {
+			value = decodeURIComponent(value);
+		}
+
+		if (key in query_params) {
+			if (typeof query_params[key] === undefined) {
+				query_params[key] = [];
+			} else if (typeof query_params[key] === "string") {
+				query_params[key] = [query_params[key]];
+			}
+			query_params[key].push(value);
+		} else {
+			query_params[key] = value;
+		}
+	}
+	return query_params;
 }
 
 function make_query_string(obj) {
@@ -572,18 +591,27 @@ $(document).ready(function() {
 	$("#website-post-login").toggleClass("hide", logged_in ? false : true);
 
 	$(".toggle-sidebar").on("click", function() {
-		$(".page-sidebar").toggleClass("hidden-xs");
-		$(".toggle-sidebar i").toggleClass("icon-rotate-180");
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
 	});
 
 	// switch to app link
 	if(getCookie("system_user")==="yes") {
-		$("#website-post-login .dropdown-menu").append('<li class="divider"></li>\
-			<li><a href="/desk" no-pjax><i class="icon-fixed-width icon-th-large"></i> Switch To Desk</a></li>');
+		$("#website-post-login .dropdown-menu").append('<li><a href="/desk" no-pjax>Switch To Desk</a></li>');
 	}
 
 	frappe.render_user();
-	frappe.setup_push_state()
+	frappe.setup_push_state();
 
 	$(document).trigger("page-change");
 });
@@ -598,4 +626,10 @@ $(document).on("page-change", function() {
 	frappe.bind_filters();
 	frappe.highlight_code_blocks();
 	frappe.make_navbar_active();
+
+	// scroll to hash
+	if (window.location.hash) {
+		var element = document.getElementById(window.location.hash.substring(1));
+		element && element.scrollIntoView(true);
+	}
 });

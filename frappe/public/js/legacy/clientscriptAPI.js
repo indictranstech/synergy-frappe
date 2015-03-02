@@ -279,24 +279,34 @@ _f.Frm.prototype.get_field = function(field) {
 	return cur_frm.fields_dict[field];
 };
 
-_f.Frm.prototype.new_doc = function(doctype, field) {
-	frappe._from_link = field; frappe._from_link_scrollY = scrollY;
-	new_doc(doctype);
+_f.Frm.prototype.new_doc = function(doctype, field, opts) {
+	frappe._from_link = field;
+	frappe._from_link_scrollY = scrollY;
+	new_doc(doctype, opts);
 }
 
 
 _f.Frm.prototype.set_read_only = function() {
 	var perm = [];
 	var docperms = frappe.perm.get_perm(cur_frm.doc.doctype);
-	for (var i=0, l=docperms.lenght; i<l; i++) {
+	for (var i=0, l=docperms.length; i<l; i++) {
 		var p = docperms[i];
 		perm[p.permlevel || 0] = {read:1};
 	}
 	cur_frm.perm = perm;
 }
 
+_f.Frm.prototype.trigger = function(event) {
+	this.script_manager.trigger(event);
+};
+
 _f.Frm.prototype.get_formatted = function(fieldname) {
 	return frappe.format(this.doc[fieldname],
 			frappe.meta.get_docfield(this.doctype, fieldname, this.docname),
 			{no_icon:true}, this.doc);
 }
+
+_f.Frm.prototype.open_grid_row = function() {
+	return frappe.ui.form.get_open_grid_form();
+}
+

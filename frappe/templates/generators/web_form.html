@@ -161,7 +161,7 @@
 	<div class="col-sm-offset-3 col-sm-9">
 		<hr>
 		<h3>{{ _("Comments") }}</h3>
-		{% include 'templates/includes/comments.html' %}
+		{% include 'templates/includes/comments/comments.html' %}
 	</div>
 </div>
 {%- endif %}
@@ -289,7 +289,7 @@ frappe.ready(function() {
 
 	// import date picker / timepicker if required
 	{% if "Date" in types %}
-	frappe.require("assets/frappe/js/lib/jquery/jquery.ui.min.js");
+	frappe.require("assets/frappe/js/lib/jquery/jquery-ui.min.js");
 	frappe.require("assets/frappe/js/lib/jquery/bootstrap_theme/jquery-ui.selected.css");
 	$form.find("[data-fieldtype='Date']").datepicker({
 		altFormat:'yy-mm-dd',

@@ -38,6 +38,10 @@ frappe.ui.form.Control = Class.extend({
 		this.$wrapper = $("<div class='frappe-control'></div>").appendTo(this.parent);
 	},
 
+	toggle: function(show) {
+		this.$wrapper.toggleClass("hide-control", !!!show);
+	},
+
 	// returns "Read", "Write" or "None"
 	// as strings based on permissions
 	get_status: function(explain) {
@@ -46,8 +50,10 @@ frappe.ui.form.Control = Class.extend({
 
 		// hide if no value
 		if (this.doctype && status==="Read"
-			&& is_null(frappe.model.get_value(this.doctype, this.docname, this.df.fieldname))) {
-			status = "None";
+			&& is_null(frappe.model.get_value(this.doctype, this.docname, this.df.fieldname))
+			&& !in_list(["HTML"], this.df.fieldtype)) {
+				if(explain) console.log("By Hide Read-only, null fields: None");
+				status = "None";
 		}
 
 		return status;
@@ -55,7 +61,7 @@ frappe.ui.form.Control = Class.extend({
 	refresh: function() {
 		this.disp_status = this.get_status();
 		this.$wrapper
-			&& this.$wrapper.toggle(this.disp_status!="None")
+			&& this.$wrapper.toggleClass("hide-control", this.disp_status=="None")
 			&& this.$wrapper.trigger("refresh");
 	},
 	get_doc: function() {
@@ -122,15 +128,16 @@ frappe.ui.form.ControlImage = frappe.ui.form.Control.extend({
 	make: function() {
 		this._super();
 		var me = this;
-		this.$wrapper = $("<div></div>")
-			.appendTo(this.parent)
-			.css({"max-width": "600px", "margin": "0px"});
+		this.$wrapper.css({"margin": "0px"});
 		this.$body = $("<div></div>").appendTo(this.$wrapper)
-			.css({"margin-bottom": "10px", "max-width": "100%"})
+			.css({"margin-bottom": "10px"})
 		this.$wrapper.on("refresh", function() {
+				var doc = null;
 				me.$body.empty();
-				if(me.df.options && me.frm.doc[me.df.options]) {
-					me.$img = $("<img src='"+me.frm.doc[me.df.options]+"' style='max-width: 100%;'>")
+
+				var doc = me.get_doc();
+				if(doc && me.df.options && doc[me.df.options]) {
+					me.$img = $("<img src='"+doc[me.df.options]+"' class='img-responsive'>")
 						.appendTo(me.$body);
 				} else {
 					me.$buffer = $("<div class='missing-image'><i class='octicon octicon-circle-slash'></i></div>")
@@ -143,7 +150,7 @@ frappe.ui.form.ControlImage = frappe.ui.form.Control.extend({
 });
 
 frappe.ui.form.ControlInput = frappe.ui.form.Control.extend({
-	// horizontal: true,
+	horizontal: true,
 	make: function() {
 		// parent element
 		this._super();
@@ -182,7 +189,7 @@ frappe.ui.form.ControlInput = frappe.ui.form.Control.extend({
 	},
 	set_max_width: function() {
 		if(this.horizontal) {
-			this.$wrapper.css({"max-width": "600px"});
+			this.$wrapper.addClass("input-max-width");
 		}
 	},
 
@@ -239,6 +246,11 @@ frappe.ui.form.ControlInput = frappe.ui.form.Control.extend({
 	bind_change_event: function() {
 		var me = this;
 		this.$input && this.$input.on("change", this.change || function(e) {
+			if(me.df.change) {
+				// onchange event specified in df
+				me.df.change.apply(this, e);
+				return;
+			}
 			if(me.doctype && me.docname && me.get_value) {
 				me.parse_validate_and_set_in_model(me.get_value());
 			} else {
@@ -353,7 +365,10 @@ frappe.ui.form.ControlData = frappe.ui.form.ControlInput.extend({
 	},
 	validate: function(v, callback) {
 		if(this.df.options == 'Phone') {
-			if(v+''=='')return '';
+			if(v+''=='') {
+				callback("");
+				return;
+			}
 			v1 = ''
 			// phone may start with + and must only have numbers later, '-' and ' ' are stripped
 			v = v.replace(/ /g, '').replace(/-/g, '').replace(/\(/g, '').replace(/\)/g, '');
@@ -371,7 +386,10 @@ frappe.ui.form.ControlData = frappe.ui.form.ControlInput.extend({
 			v1 += cint(v) + '';
 			callback(v1);
 		} else if(this.df.options == 'Email') {
-			if(v+''=='')return '';
+			if(v+''=='') {
+				callback("");
+				return;
+			}
 			if(!validate_email(v)) {
 				msgprint(__("Invalid Email: {0}", [v]));
 					callback("");
@@ -588,6 +606,7 @@ frappe.ui.form.ControlButton = frappe.ui.form.ControlData.extend({
 		this.input = this.$input.get(0);
 		this.set_input_attributes();
 		this.has_input = true;
+		this.$wrapper.find(".control-label").addClass("hide");
 	},
 	onclick: function() {
 		if(this.frm && this.frm.doc) {
@@ -603,7 +622,7 @@ frappe.ui.form.ControlButton = frappe.ui.form.ControlData.extend({
 	},
 	set_input_areas: function() {
 		this._super();
-		$(this.disp_area).removeClass();
+		$(this.disp_area).removeClass().addClass("hide");
 	},
 	set_empty_description: function() {
 		this.$wrapper.find(".help-box").empty().toggle(false);
@@ -658,27 +677,60 @@ frappe.ui.form.ControlAttach = frappe.ui.form.ControlData.extend({
 		if(!this.dialog) {
 			this.dialog = new frappe.ui.Dialog({
 				title: __(this.df.label || __("Upload")),
+				fields: [
+					{fieldtype:"HTML", fieldname:"upload_area"},
+					{fieldtype:"HTML", fieldname:"or_attach", options: __("Or")},
+					{fieldtype:"Select", fieldname:"select", label:__("Select from existing attachments") },
+				]
 			});
 		}
 
-		$(this.dialog.body).empty();
+		this.dialog.show();
+
+		this.dialog.get_field("upload_area").$wrapper.empty();
+
+		// select from existing attachments
+		var attachments = this.frm && this.frm.attachments.get_attachments() || [];
+		var select = this.dialog.get_field("select");
+		if(attachments.length) {
+			attachments = $.map(attachments, function(o) { return o.file_url; })
+			select.df.options = [""].concat(attachments);
+			select.toggle(true);
+			this.dialog.get_field("or_attach").toggle(true);
+			select.refresh();
+		} else {
+			this.dialog.get_field("or_attach").toggle(false);
+			select.toggle(false);
+		}
+		select.$input.val("");
 
 		this.set_upload_options();
 		frappe.upload.make(this.upload_options);
-		this.dialog.show();
 	},
 
 	set_upload_options: function() {
 		var me = this;
 		this.upload_options = {
-			parent: this.dialog.body,
+			parent: this.dialog.get_field("upload_area").$wrapper,
 			args: {},
 			max_width: this.df.max_width,
 			max_height: this.df.max_height,
+			options: this.df.options,
 			btn: this.dialog.set_primary_action(__("Upload")),
+			on_no_attach: function() {
+				// if no attachmemts,
+				// check if something is selected
+				var selected = me.dialog.get_field("select").get_value();
+				if(selected) {
+					me.parse_validate_and_set_in_model(selected);
+					me.dialog.hide();
+				} else {
+					msgprint(__("Please attach a file or set a URL"));
+				}
+			},
 			callback: function(attachment, r) {
-				me.dialog.hide();
 				me.on_upload_complete(attachment);
+				me.dialog.hide();
 			},
 			onerror: function() {
 				me.dialog.hide();
@@ -772,9 +824,6 @@ frappe.ui.form.ControlSelect = frappe.ui.form.ControlData.extend({
 	make_input: function() {
 		var me = this;
 		this._super();
-		if(this.df.options=="attach_files:") {
-			this.setup_attachment();
-		}
 		this.set_options();
 	},
 	set_input: function(value) {
@@ -801,32 +850,9 @@ frappe.ui.form.ControlSelect = frappe.ui.form.ControlData.extend({
 			}
 		}
 	},
-	setup_attachment: function() {
-		var me = this;
-		$(this.input).css({"width": "85%", "display": "inline-block"});
-		this.$attach = $("<button class='btn btn-default btn-sm' title='"+ __("Add attachment") + "'\
-			style='padding-left: 6px; padding-right: 6px; margin-right: 6px;'>\
-			<i class='icon-plus'></i></button>")
-			.click(function() {
-				me.frm.attachments.new_attachment(me.df.fieldname);
-			})
-			.prependTo(this.input_area);
-
-		$(document).on("upload_complete", function(event, attachment) {
-			if(cur_frm === me.frm) {
-				me.set_options();
-			}
-		})
-
-		this.$wrapper.on("refresh", function() {
-			me.$attach.toggle(!me.frm.doc.__islocal);
-		});
-	},
 	set_options: function(value) {
 		var options = this.df.options || [];
-		if(this.df.options=="attach_files:") {
-			options = this.get_file_attachment_list();
-		} else if(typeof this.df.options==="string") {
+		if(typeof this.df.options==="string") {
 			options = this.df.options.split("\n");
 		}
 		if(this.in_filter && options[0] != "") {
@@ -928,10 +954,9 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 		var doctype = this.get_options();
 		if(!doctype) return;
 		if(this.frm) {
-			this.frm.new_doc(doctype, this);
-
+			this.frm.new_doc(doctype, this, {"name_field": this.get_value()});
 		} else {
-			new_doc(doctype);
+			new_doc(doctype, {"name_field": this.get_value()});
 		}
 	},
 	setup_autocomplete: function() {
@@ -1231,15 +1256,6 @@ frappe.ui.form.ControlTable = frappe.ui.form.Control.extend({
 		this._super();
 
 		// add title if prev field is not column / section heading or html
-		var prev_fieldtype = "";
-		if(this.df.idx > 1) {
-			var prev_fieldtype = cur_frm.meta.fields[this.df.idx - 2].fieldtype;
-		}
-
-		if(frappe.model.layout_fields.indexOf(prev_fieldtype)===-1) {
-			$("<label>" + __(this.df.label) + "<label>").appendTo(this.wrapper);
-		}
-
 		this.grid = new frappe.ui.form.Grid({
 			frm: this.frm,
 			df: this.df,
