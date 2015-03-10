@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
 from __future__ import unicode_literals
@@ -51,7 +51,7 @@ def get_user_lang(user=None):
 		# if defined in user profile
 		user_lang = frappe.db.get_value("User", user, "language")
 		if user_lang and user_lang!="Loading...":
-			lang = get_lang_dict().get(user_lang)
+			lang = get_lang_dict().get(user_lang) or frappe.local.lang
 		else:
 			default_lang = frappe.db.get_default("lang")
 			lang = default_lang or frappe.local.lang
@@ -176,8 +176,12 @@ def load_lang(lang, apps=None):
 	for app in (apps or frappe.get_all_apps(True)):
 		path = os.path.join(frappe.get_pymodule_path(app), "translations", lang + ".csv")
 		if os.path.exists(path):
-			cleaned = dict([(item[1], item[2]) for item in read_csv_file(path) if item[2]])
-			# cleaned = dict([(item[0], item[1]) for item in read_csv_file(path) if item[1]])
+			csv_content = read_csv_file(path)
+			try:
+				# with file and line numbers
+				cleaned = dict([(item[1], item[2]) for item in csv_content if item[2]])
+			except IndexError:
+				cleaned = dict([(item[0], item[1]) for item in csv_content if item[1]])
 			out.update(cleaned)
 	return out
 
@@ -285,9 +289,10 @@ def _get_messages_from_page_or_report(doctype, name, module=None):
 
 	messages = get_messages_from_file(os.path.join(doc_path, name +".py"))
 
-	for filename in os.listdir(doc_path):
-		if filename.endswith(".js") or filename.endswith(".html"):
-			messages += get_messages_from_file(os.path.join(doc_path, filename))
+	if os.path.exists(doc_path):
+		for filename in os.listdir(doc_path):
+			if filename.endswith(".js") or filename.endswith(".html"):
+				messages += get_messages_from_file(os.path.join(doc_path, filename))
 
 	return messages
 
@@ -361,7 +366,7 @@ def pos_to_line_no(messages, code):
 			newline_i+= 1
 		ret.append((line, message))
 	return ret
-			
+
 def read_csv_file(path):
 	"""Read CSV file and return as list of list
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // MIT License. See license.txt
 
 frappe.provide("frappe.views");
@@ -96,7 +96,7 @@ frappe.views.QueryReport = Class.extend({
 
 					frappe.model.with_doctype(me.report_doc.ref_doctype, function() {
 						var module = locals.DocType[me.report_doc.ref_doctype].module;
-						frappe.add_breadcrumbs(module)
+						frappe.breadcrumbs.add(module)
 
 						if(!frappe.query_reports[me.report_name]) {
 							return frappe.call({

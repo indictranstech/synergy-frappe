@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // MIT License. See license.txt
 
 /* Form page structure
@@ -37,6 +37,7 @@ _f.Frm = function(doctype, parent, in_form) {
 	this.sections = [];
 	this.grids = [];
 	this.cscript = new frappe.ui.form.Controller({frm:this});
+	this.events = {};
 	this.pformat = {};
 	this.fetch_dict = {};
 	this.parent = parent;
@@ -172,10 +173,7 @@ _f.Frm.prototype.print_doc = function() {
 		msgprint(__("Cannot print cancelled documents"));
 		return;
 	}
-	this.print_preview.print_sel
-		.empty().add_options(this.print_preview.print_formats)
-		.trigger("change");
-
+	this.print_preview.refresh_print_options().trigger("change");
 	this.page.set_view("print");
 }
 
@@ -397,12 +395,17 @@ _f.Frm.prototype.refresh = function(docname) {
 			this.render_form();
 		}
 
+		// if print format is shown, refresh the format
+		if(this.print_preview.wrapper.is(":visible")) {
+			this.print_preview.preview();
+		}
 	}
 }
 
 _f.Frm.prototype.render_form = function() {
 	if(!this.meta.istable) {
-		// header
+		// header must be refreshed before client methods
+		// because add_custom_button
 		this.refresh_header();
 		this.sidebar.refresh();
 
@@ -415,6 +418,7 @@ _f.Frm.prototype.render_form = function() {
 
 		// fields
 		this.refresh_fields();
+
 
 		// call onload post render for callbacks to be fired
 		if(this.cscript.is_onload) {
@@ -492,7 +496,7 @@ _f.Frm.prototype.setnewdoc = function() {
 		me.script_manager.trigger("onload");
 		me.opendocs[me.docname] = true;
 		me.render_form();
-		frappe.add_breadcrumbs(me.meta.module, me.doctype)
+		frappe.breadcrumbs.add(me.meta.module, me.doctype)
 	})
 
 }
@@ -504,26 +508,20 @@ _f.Frm.prototype.runscript = function(scriptname, callingfield, onrefresh) {
 		if(callingfield)
 			$(callingfield.input).set_working();
 
-		return $c('runserverobj', {'docs':this.doc, 'method':scriptname },
-			function(r, rtxt) {
-				// run refresh
-				if(onrefresh)
-					onrefresh(r,rtxt);
+		frappe.call({
+			method: "runserverobj",
+			args: {'docs':this.doc, 'method':scriptname },
+			btn: callingfield.$input,
+			callback: function(r) {
+				if(!r.exc) {
+					if(onrefresh) {
+						onrefresh(r);
+					}
 
-				// fields
-				me.refresh_fields();
-
-				// enable button
-				if(callingfield)
-					$(callingfield.input).done_working();
-			},
-			// error
-			function() {
-				// enable button
-				if(callingfield)
-					$(callingfield.input).done_working();
+					me.refresh_fields();
+				}
 			}
-		);
+		});
 	}
 }
 
@@ -794,3 +792,7 @@ _f.Frm.prototype.validate_form_action = function(action) {
 		frappe.throw (__("No permission to '{0}' {1}", [__(action), __(this.doc.doctype)]));
 	}
 };
+
+_f.Frm.prototype.get_handlers = function(fieldname, doctype, docname) {
+	return this.script_manager.get_handlers(fieldname, doctype || this.doctype, docname || this.docname)
+}

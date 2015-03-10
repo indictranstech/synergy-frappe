@@ -44,20 +44,37 @@ a.form-link {
 
 #alert-container {
 	position: fixed;
-	bottom: 8px;
-	right: 8px;
+	bottom: 0px;
+	right: 20px;
 	z-index: 1050;
 }
 
-#alert-container .alert {
-  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-     -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+#alert-container .desk-alert {
+  -webkit-box-shadow: 0 0px 5px rgba(0, 0, 0, 0.1);
+     -moz-box-shadow: 0 0px 5px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 0px 5px rgba(0, 0, 0, 0.1);
 
-		overflow: hidden;
-		max-width: 400px;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+	padding: 10px 40px 10px 20px;
+	max-width: 400px;
+	max-height: 200px;
+	background-color: @light-yellow;
+	border: 1px solid @border-color;
+
+	word-break: break-all;
+	overflow-y: auto;
+	position: relative;
+
+	.close {
+		color: inherit;
+		line-height: inherit;
+		opacity: 1;
+		font-size: inherit;
+		float: none;
+		margin-left: 15px;
+		margin-right: 15px;
+		position: absolute;
+		right: 0px;
+	}
 }
 
 .missing-image {
@@ -236,43 +253,6 @@ ul.linked-with-list li {
 	  margin-top: 0px;
 	  margin-left: 2px;
 	}
-}
-
-.full-center-container {
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
-}
-
-.full-center {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	width: 100%;
-	transform: translate(-50%, -50%);
-	-webkit-transform: translate(-50%, -50%);
-}
-
-#freeze {
-	z-index: 1020;
-	bottom: 0px;
-	opacity: 0;
-
-	.freeze-message-container {
-		.full-center-container;
-	}
-
-	.freeze-message {
-		.full-center;
-		text-align: center;
-		color: #fff !important;
-	}
-}
-
-#freeze.in {
-	opacity: 0.5;
 }
 
 .msg-box {

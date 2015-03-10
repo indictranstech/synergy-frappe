@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
 from __future__ import unicode_literals
@@ -42,7 +42,7 @@ type_map = {
 default_columns = ['name', 'creation', 'modified', 'modified_by', 'owner',
 	'docstatus', 'parent', 'parentfield', 'parenttype', 'idx']
 
-default_shortcuts = ['_Login', '__user', '_Full Name', 'Today', '__today']
+default_shortcuts = ['_Login', '__user', '_Full Name', 'Today', '__today', "now", "Now"]
 
 def updatedb(dt):
 	"""

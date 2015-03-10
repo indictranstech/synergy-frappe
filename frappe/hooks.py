@@ -1,11 +1,11 @@
 from __future__ import unicode_literals
 app_name = "frappe"
 app_title = "Frappe Framework"
-app_publisher = "Web Notes Technologies Pvt. Ltd."
+app_publisher = "Frappe Technologies Pvt. Ltd."
 app_description = "Full Stack Web Application Framework in Python"
-app_icon = "assets/frappe/images/frappe.svg"
+app_icon = "octicon octicon-circuit-board"
 app_version = "5.0.0-alpha"
-app_color = "#3498db"
+app_color = "orange"
 app_email = "support@frappe.io"
 
 before_install = "frappe.utils.install.before_install"
@@ -15,9 +15,17 @@ after_install = "frappe.utils.install.after_install"
 app_include_js = [
 	"assets/js/desk.min.js",
 	"assets/js/editor.min.js",
+	"assets/js/list.min.js",
+	"assets/js/form.min.js",
+	"assets/js/report.min.js",
+	"assets/js/module.min.js"
 ]
 app_include_css = [
-	"assets/css/desk.min.css"
+	"assets/css/desk.min.css",
+	"assets/css/list.min.css",
+	"assets/css/form.min.css",
+	"assets/css/report.min.css",
+	"assets/css/module.min.css"
 ]
 
 web_include_js = [
@@ -45,7 +53,10 @@ website_generators = ["Web Page", "Blog Post", "Blog Category", "Web Form"]
 
 # login
 
-on_session_creation = "frappe.desk.doctype.feed.feed.login_feed"
+on_session_creation = [
+	"frappe.desk.doctype.feed.feed.login_feed",
+	"frappe.core.doctype.user.user.notifify_admin_access_to_system_manager"
+]
 
 # permissions
 

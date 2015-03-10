@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 """
 globals attached to frappe module
@@ -387,7 +387,7 @@ def has_permission(doctype, ptype="read", doc=None, user=None, verbose=False):
 	:param doc: [optional] Checks User permissions for given doc.
 	:param user: [optional] Check for given user. Default: current user."""
 	import frappe.permissions
-	return frappe.permissions.has_permission(doctype, ptype, doc, verbose=verbose, user=user)
+	return frappe.permissions.has_permission(doctype, ptype, doc=doc, verbose=verbose, user=user)
 
 def has_website_permission(doctype, ptype="read", doc=None, user=None, verbose=False):
 	"""Raises `frappe.PermissionError` if not permitted.
@@ -569,40 +569,22 @@ def get_all_apps(with_frappe=False, with_internal_apps=True, sites_path=None):
 	if with_internal_apps:
 		apps.extend(get_file_items(os.path.join(local.site_path, "apps.txt")))
 	if with_frappe:
+		if "frappe" in apps:
+			apps.remove("frappe")
 		apps.insert(0, 'frappe')
 	return apps
 
-def get_installed_apps():
+def get_installed_apps(sort=False):
 	"""Get list of installed apps in current site."""
 	if getattr(flags, "in_install_db", True):
 		return []
+
 	installed = json.loads(db.get_global("installed_apps") or "[]")
+
+	if sort:
+		installed = [app for app in get_all_apps(True) if app in installed]
+
 	return installed
-
-@whitelist()
-def get_versions():
-	"""Get versions of all installed apps.
-
-	Example:
-
-		{
-			"frappe": {
-				"title": "Frappe Framework",
-				"version": "5.0.0"
-			}
-		}"""
-	versions = {}
-	for app in get_installed_apps():
-		versions[app] = {
-			"title": get_hooks("app_title", app_name=app),
-			"description": get_hooks("app_description", app_name=app)
-		}
-		try:
-			versions[app]["version"] = get_attr(app + ".__version__")
-		except AttributeError:
-			versions[app]["version"] = '0.0.1'
-
-	return versions
 
 def get_hooks(hook=None, default=None, app_name=None):
 	"""Get hooks via `app/hooks.py`
@@ -715,8 +697,8 @@ def call(fn, *args, **kwargs):
 		fnargs, varargs, varkw, defaults = inspect.getargspec(fn)
 
 	newargs = {}
-	for a in fnargs:
-		if a in kwargs:
+	for a in kwargs:
+		if (a in fnargs) or varkw:
 			newargs[a] = kwargs.get(a)
 
 	if "flags" in newargs:

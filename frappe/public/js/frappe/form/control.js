@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // MIT License. See license.txt
 
 frappe.ui.form.make_control = function (opts) {
@@ -39,7 +39,8 @@ frappe.ui.form.Control = Class.extend({
 	},
 
 	toggle: function(show) {
-		this.$wrapper.toggleClass("hide-control", !!!show);
+		this.df.hidden = show ? 0 : 1;
+		this.refresh();
 	},
 
 	// returns "Read", "Write" or "None"
@@ -787,7 +788,7 @@ frappe.ui.form.ControlAttach = frappe.ui.form.ControlData.extend({
 			this.frm.attachments.update_attachment(attachment);
 		} else {
 			this.set_input(this.fileobj.filename, this.dataurl);
-			//this.refresh();
+			this.refresh();
 		}
 	},
 });
@@ -1147,13 +1148,17 @@ frappe.ui.form.ControlTextEditor = frappe.ui.form.ControlCode.extend({
 	make_rich_text_editor: function() {
 		var me = this;
 		this.editor_wrapper = $("<div>").appendTo(this.input_area);
+		var onchange = function(value) {
+			me.md_editor.val(value);
+			me.parse_validate_and_set_in_model(value);
+		}
 		this.editor = new (frappe.provide(this.editor_name))({
 			parent: this.editor_wrapper,
-			change: function(value) {
-				me.md_editor.val(value);
-				me.parse_validate_and_set_in_model(value);
-			},
+			change: onchange,
 			field: this
+		});
+		this.editor.editor.on("blur", function() {
+			onchange(me.editor.clean_html());
 		});
 		this.editor.editor.keypress("ctrl+s meta+s", function() {
 			me.frm.save_or_update();

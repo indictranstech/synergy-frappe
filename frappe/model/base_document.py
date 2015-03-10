@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
 from __future__ import unicode_literals
@@ -271,11 +271,12 @@ class BaseDocument(object):
 			else:
 				raise
 
-	def db_set(self, fieldname, value):
+	def db_set(self, fieldname, value, update_modified=True):
 		self.set(fieldname, value)
 		self.set("modified", now())
 		self.set("modified_by", frappe.session.user)
-		frappe.db.set_value(self.doctype, self.name, fieldname, value, self.modified, self.modified_by)
+		frappe.db.set_value(self.doctype, self.name, fieldname, value,
+			self.modified, self.modified_by, update_modified=update_modified)
 
 	def _fix_numeric_types(self):
 		for df in self.meta.get("fields"):

@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // MIT License. See license.txt
 
 frappe.provide("frappe.ui.form.handlers");
@@ -12,6 +12,10 @@ frappe.ui.form.on = frappe.ui.form.on_change = function(doctype, fieldname, hand
 			frappe.ui.form.handlers[doctype][fieldname] = [];
 		}
 		frappe.ui.form.handlers[doctype][fieldname].push(handler);
+
+		// add last handler to events so it can be called as
+		// frm.events.handler(frm)
+		cur_frm.events[fieldname] = handler;
 	}
 
 	if (!handler && $.isPlainObject(fieldname)) {
@@ -76,7 +80,7 @@ frappe.ui.form.ScriptManager = Class.extend({
 		// setup add fetch
 		$.each(this.frm.fields, function(i, field) {
 			var df = field.df;
-			if(df.fieldtype==="Read Only" && df.options && df.options.indexOf(".")!=-1) {
+			if((df.fieldtype==="Read Only" || df.read_only==1) && df.options && df.options.indexOf(".")!=-1) {
 				var parts = df.options.split(".");
 				me.frm.add_fetch(parts[0], parts[1], df.fieldname);
 			}

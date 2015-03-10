@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // MIT License. See license.txt
 
 frappe.ui.form.get_open_grid_form = function() {
@@ -358,7 +358,7 @@ frappe.ui.form.GridRow = Class.extend({
 			}
 			var add_class = (["Text", "Small Text"].indexOf(df.fieldtype)===-1) ?
 				" grid-overflow-ellipsis" : " grid-overflow-no-ellipsis";
-			add_class += (["Int", "Currency", "Float"].indexOf(df.fieldtype)!==-1) ?
+			add_class += (["Int", "Currency", "Float", "Percent"].indexOf(df.fieldtype)!==-1) ?
 				" text-right": "";
 
 			$col = $('<div class="col col-xs-'+colsize+add_class+' grid-static-col"></div>')
@@ -403,9 +403,14 @@ frappe.ui.form.GridRow = Class.extend({
 			for(var i in this.static_display_template) {
 				var df = this.static_display_template[i][0];
 				var colsize = this.static_display_template[i][1];
-				if(colsize > 1 && colsize < 12 && ["Int", "Currency", "Float",
-					"Check", "Percent"].indexOf(df.fieldtype)===-1
+				if(colsize > 1 && colsize < 12
 					&& !in_list(frappe.model.std_fields_list, df.fieldname)) {
+
+					if (passes < 3 && ["Int", "Currency", "Float", "Check", "Percent"].indexOf(df.fieldtype)!==-1) {
+						// don't increase col size of these fields in first 3 passes
+						continue;
+					}
+
 					this.static_display_template[i][1] += 1;
 					total_colsize++;
 				}

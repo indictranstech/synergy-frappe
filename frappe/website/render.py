@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
 from __future__ import unicode_literals
@@ -99,7 +99,7 @@ def build_response(path, data, http_status_code, headers=None):
 
 def render_page(path):
 	"""get page html"""
-	cache_key = ("page_context:{}" if is_ajax() else "page:{}").format(path)
+	cache_key = ("page_context:{0}:{1}" if is_ajax() else "page:{0}:{1}").format(path, frappe.local.lang)
 
 	out = None
 
@@ -135,7 +135,7 @@ def build_json(path):
 	return get_context(path).data
 
 def build_page(path):
-	if not hasattr(frappe.local, "path"):
+	if not getattr(frappe.local, "path", None):
 		frappe.local.path = path
 
 	context = get_context(path)
@@ -144,7 +144,7 @@ def build_page(path):
 	html = scrub_relative_urls(html)
 
 	if can_cache(context.no_cache):
-		frappe.cache().set_value("page:" + path, html)
+		frappe.cache().set_value("page:{0}:{1}".format(path, frappe.local.lang), html)
 
 	return html
 

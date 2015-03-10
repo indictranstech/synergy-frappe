@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 from __future__ import unicode_literals
 
@@ -88,7 +88,11 @@ class TestDocument(unittest.TestCase):
 
 	def test_confict_validation_single(self):
 		d1 = frappe.get_doc("Website Settings", "Website Settings")
+		d1.home_page = "test-web-page-1"
+
 		d2 = frappe.get_doc("Website Settings", "Website Settings")
+		d2.home_page = "test-web-page-1"
+
 		d1.save()
 		self.assertRaises(frappe.TimestampMismatchError, d2.save)
 

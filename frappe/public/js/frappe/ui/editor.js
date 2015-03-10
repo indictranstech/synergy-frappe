@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // MIT License. See license.txt
 
 /* Inspired from: http://github.com/mindmup/bootstrap-wysiwyg */
@@ -126,6 +126,7 @@ bsEditor = Class.extend({
 	clean_html: function() {
 
 		var html = this.editor.html() || "";
+
 		if(!$.trim(this.editor.text()) && !(this.editor.find("img"))) html = "";
 
 		// remove custom typography (use CSS!)
@@ -160,7 +161,7 @@ bsEditor = Class.extend({
 		$.each(files, function (i, file) {
 			if (/^image\//.test(file.type)) {
 				me.get_image(file, function(image_url) {
-					me.toolbar.execCommand('insertimage', image_url);
+					me.toolbar.execCommand('insertImage', image_url);
 				})
 			}
 		});
@@ -371,6 +372,7 @@ bsEditorToolbar = Class.extend({
 			}
 			me.save_selection();
 			this.value = '';
+
 			return false;
 		});
 

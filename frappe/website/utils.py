@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
 from __future__ import unicode_literals
@@ -156,3 +156,9 @@ def convert_to_hex(channel_value):
 		h = "0" + h
 
 	return h
+
+def with_leading_slash(path):
+	if path and not path.startswith("/"):
+		path = "/" + path
+
+	return path

@@ -1,8 +1,8 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
 from __future__ import unicode_literals
-import frappe, os, time
+import frappe, os
 
 def sync_statics(rebuild=False):
 	s = sync()
@@ -28,6 +28,7 @@ class sync(object):
 			frappe.db.sql("delete from `tabWeb Page` where ifnull(template_path, '')!=''")
 
 		for app in frappe.get_installed_apps():
+			print "Syncing for {0}".format(app)
 			self.sync_for_app(app)
 		self.cleanup()
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // MIT License. See license.txt
 
 frappe.views.ReportFactory = frappe.views.Factory.extend({
@@ -51,7 +51,7 @@ frappe.views.ReportViewPage = Class.extend({
 	make_report_view: function() {
 		this.page.set_title(__(this.doctype));
 		var module = locals.DocType[this.doctype].module;
-		frappe.add_breadcrumbs(module, this.doctype)
+		frappe.breadcrumbs.add(module, this.doctype)
 
 		this.parent.reportview = new frappe.views.ReportView({
 			doctype: this.doctype,

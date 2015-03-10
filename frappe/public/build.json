@@ -27,6 +27,7 @@
 		"public/css/bootstrap.css",
 		"public/css/font-awesome.css",
 		"public/css/octicons/octicons.css",
+		"public/css/font/open-sans/open-sans.css",
 		"public/css/desk.css",
 		"public/css/indicator.css",
 		"public/css/avatar.css",
@@ -99,6 +100,7 @@
 		"public/js/frappe/ui/tree.js",
 
 		"public/js/frappe/views/container.js",
+		"public/js/frappe/views/breadcrumbs.js",
 		"public/js/frappe/views/factory.js",
 		"public/js/frappe/views/pageview.js",
 
@@ -109,6 +111,7 @@
 		"public/js/frappe/ui/toolbar/toolbar.js",
 		"public/js/frappe/views/communication.js",
 
+		"public/js/frappe/change_log.html",
 		"public/js/frappe/desk.js"
 	],
 	"css/module.min.css": [

@@ -1,10 +1,11 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 from __future__ import unicode_literals
 
 import sys, os
 import json
 import logging
+import MySQLdb
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.local import LocalManager
@@ -70,7 +71,15 @@ def application(request):
 	except Exception, e:
 		http_status_code = getattr(e, "http_status_code", 500)
 
-		if frappe.local.is_ajax:
+		if (http_status_code==500
+			and isinstance(e, MySQLdb.OperationalError)
+			and e.args[0] in (1205, 1213)):
+				# 1205 = lock wait timeout
+				# 1213 = deadlock
+				# code 409 represents conflict
+				http_status_code = 409
+
+		if frappe.local.is_ajax or 'application/json' in request.headers.get('Accept', ''):
 			response = frappe.utils.response.report_error(http_status_code)
 		else:
 			frappe.respond_as_web_page("Server Error",

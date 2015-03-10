@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
 from __future__ import unicode_literals
@@ -20,6 +20,7 @@ def read_csv_content_from_uploaded_file(ignore_encoding=False):
 def read_csv_content_from_attached_file(doc):
 	fileid = frappe.db.get_value("File Data", {"attached_to_doctype": doc.doctype,
 		"attached_to_name":doc.name}, "name")
+
 	if not fileid:
 		msgprint(_("File not attached"))
 		raise Exception

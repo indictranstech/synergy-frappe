@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // MIT License. See license.txt
 
 // TODO
@@ -7,8 +7,6 @@
 frappe.provide('frappe.desk.pages.messages');
 
 frappe.pages.messages.on_page_load = function(parent) {
-	frappe.assets.views["Form"]();
-
 	var page = frappe.ui.make_app_page({
 		parent: parent,
 	});

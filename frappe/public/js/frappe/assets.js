@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // MIT License. See license.txt
 
 // library to mange assets (js, css, models, html) etc in the app.
@@ -126,34 +126,4 @@ frappe.assets = {
 			frappe.dom.set_style(txt);
 		}
 	},
-
-	views: {
-		"List": function() {
-			frappe.require("assets/css/list.min.css");
-			frappe.require("assets/js/list.min.js");
-		},
-		"Form": function() {
-			frappe.assets.views["List"]();
-			frappe.require("assets/css/form.min.css");
-			frappe.require("assets/js/form.min.js");
-		},
-		"Report": function() {
-			frappe.assets.views["List"]();
-			frappe.require("assets/css/report.min.css");
-			frappe.require("assets/js/report.min.js");
-		},
-		"Module": function() {
-			frappe.require("assets/css/module.min.css");
-			frappe.require("assets/js/module.min.js");
-		},
-		"Calendar": function() {
-			frappe.assets.views["List"]();
-		},
-		"Gantt": function() {
-			frappe.assets.views["List"]();
-		},
-		"query-report": function() {
-			frappe.assets.views["Report"]();
-		}
-	}
 };

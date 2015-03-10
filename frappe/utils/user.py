@@ -1,10 +1,11 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
 from __future__ import unicode_literals
 
 import frappe, json
 from frappe import _dict
+import frappe.share
 
 class User:
 	"""
@@ -72,10 +73,14 @@ class User:
 		"""
 		self.build_doctype_map()
 		self.build_perm_map()
+		user_shared = frappe.share.get_shared_doctypes()
 
 		for dt in self.doctype_map:
 			dtp = self.doctype_map[dt]
 			p = self.perm_map.get(dt, {})
+
+			if not p.get("read") and (dt in user_shared):
+				p["read"] = 1
 
 			if not dtp.get('istable'):
 				if p.get('create') and not dtp.get('issingle'):
@@ -128,6 +133,25 @@ class User:
 		import frappe.defaults
 		self.defaults = frappe.defaults.get_defaults(self.name)
 		return self.defaults
+
+	# update recent documents
+	def update_recent(self, dt, dn):
+		rdl = frappe.cache().get_value("recent:" + self.name) or []
+		new_rd = [dt, dn]
+
+		# clear if exists
+		for i in range(len(rdl)):
+			rd = rdl[i]
+			if rd==new_rd:
+				del rdl[i]
+				break
+
+		if len(rdl) > 19:
+			rdl = rdl[:19]
+
+		rdl = [new_rd] + rdl
+
+		r = frappe.cache().set_value("recent:" + self.name, rdl)
 
 	def _get(self, key):
 		if not self.can_read:

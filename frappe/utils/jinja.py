@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 from __future__ import unicode_literals
 
@@ -91,11 +91,8 @@ def get_jloader():
 	if not frappe.local.jloader:
 		from jinja2 import ChoiceLoader, PackageLoader, PrefixLoader
 
-		apps = frappe.get_installed_apps()
-
-		# put frappe at the end
-		apps.remove("frappe")
-		apps.append("frappe")
+		apps = frappe.get_installed_apps(sort=True)
+		apps.reverse()
 
 		frappe.local.jloader = ChoiceLoader(
 			# search for something like app/templates/...
@@ -112,7 +109,7 @@ def get_jloader():
 def set_filters(jenv):
 	import frappe
 	from frappe.utils import global_date_format, cint, cstr, flt
-	from frappe.website.utils import get_shade
+	from frappe.website.utils import get_shade, with_leading_slash
 	from markdown2 import markdown
 	from json import dumps
 
@@ -124,6 +121,7 @@ def set_filters(jenv):
 	jenv.filters["int"] = cint
 	jenv.filters["str"] = cstr
 	jenv.filters["flt"] = flt
+	jenv.filters["with_leading_slash"] = with_leading_slash
 
 	# load jenv_filters from hooks.py
 	for app in frappe.get_installed_apps():

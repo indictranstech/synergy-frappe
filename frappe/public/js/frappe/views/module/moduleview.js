@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // MIT License. See license.txt
 
 frappe.provide("frappe.views.moduleview");
@@ -105,6 +105,8 @@ frappe.views.moduleview.ModuleView = Class.extend({
         var route = [item.route || item.link];
         if (!route[0]) {
             if (item.type == "doctype") {
+				// save the last page from the breadcrumb was accessed
+				frappe.breadcrumbs.set_doctype_module(item.name, this.module);
                 route = ["List", item.name];
             } else if (item.type == "page") {
                 route = [item.name]

@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // MIT License. See license.txt
 
 // for license information please see license.txt
@@ -10,7 +10,7 @@ frappe.form.formatters = {
 		if(options && options.inline) {
 			return value;
 		} else {
-			return "<div style='text-align: right'>" + value + "</div>";
+			return "<span style='text-align: right'>" + value + "</span>";
 		}
 	},
 	Data: function(value) {

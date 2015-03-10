@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
 from __future__ import unicode_literals
@@ -15,6 +15,7 @@ from frappe.utils import cint, cstr
 import frappe.model.meta
 import frappe.defaults
 import frappe.translate
+import frappe.change_log
 import redis
 from urllib import unquote
 
@@ -40,6 +41,7 @@ def clear_cache(user=None):
 def clear_global_cache():
 	frappe.model.meta.clear_cache()
 	frappe.cache().delete_value(["app_hooks", "installed_apps", "app_modules", "module_app", "time_zone"])
+	frappe.setup_module_map()
 
 def clear_sessions(user=None, keep_current=False):
 	if not user:
@@ -83,8 +85,7 @@ def get():
 		if bootinfo:
 			bootinfo['from_cache'] = 1
 			bootinfo["notification_info"].update(get_notifications())
-			# bootinfo["user"]["recent"] = \
-			# 	json.dumps(frappe.cache().get_value("recent", user=True))
+			bootinfo["user"]["recent"] = json.dumps(frappe.cache().get_value("recent:" + frappe.session.user))
 
 	if not bootinfo:
 		# if not create it
@@ -100,8 +101,11 @@ def get():
 			else:
 				bootinfo['messages'] = [message]
 
-	bootinfo["metadata_version"] = frappe.cache().get_value("metadata_version")
+		# check only when clear cache is done, and don't cache this
+		if frappe.local.request:
+			bootinfo["change_log"] = frappe.change_log.get_change_log()
 
+	bootinfo["metadata_version"] = frappe.cache().get_value("metadata_version")
 	if not bootinfo["metadata_version"]:
 		bootinfo["metadata_version"] = frappe.reset_metadata_version()
 
@@ -145,7 +149,6 @@ class Session:
 
 		# insert session
 		if self.user!="Guest":
-			frappe.db.begin()
 			self.insert_session_record()
 
 			# update user

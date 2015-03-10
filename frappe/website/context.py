@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
 from __future__ import unicode_literals
@@ -11,7 +11,7 @@ from frappe.website.utils import can_cache
 
 def get_context(path):
 	context = None
-	cache_key = "page_context:{}".format(path)
+	cache_key = "page_context:{0}:{1}".format(path, frappe.local.lang)
 
 	def add_data_path(context):
 		if not context.data:
@@ -42,6 +42,7 @@ def build_context(context):
 	"""get_context method of doc or module is supposed to render content templates and push it into context"""
 	context = frappe._dict(context)
 	context.update(get_website_settings())
+	context.update(frappe.local.conf.get("website_context") or {})
 
 	# provide doc
 	if context.doc:
@@ -75,7 +76,6 @@ def build_context(context):
 				context.children = module.get_children(context)
 
 	add_metatags(context)
-	context.update(frappe.get_hooks("website_context") or {})
 
 	# determine templates to be used
 	if not context.base_template_path:

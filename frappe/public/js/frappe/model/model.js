@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // MIT License. See license.txt
 
 frappe.provide('frappe.model');
@@ -119,6 +119,10 @@ $.extend(frappe.model, {
 		return frappe.model.docinfo[doctype] && frappe.model.docinfo[doctype][name] || null;
 	},
 
+	get_shared: function(doctype, name) {
+		return frappe.model.get_docinfo(doctype, name).shared;
+	},
+
 	get_server_module_name: function(doctype) {
 		var dt = frappe.model.scrub(doctype);
 		var module = frappe.model.scrub(locals.DocType[doctype].module);
@@ -198,8 +202,10 @@ $.extend(frappe.model, {
 	},
 
 	can_share: function(doctype, frm) {
-		if(frm) return frm.perm[0].share===1;
-		return frappe.boot.user.can_email.indexOf(doctype)!==-1;
+		if(frm) {
+			return frm.perm[0].share===1;
+		}
+		return frappe.boot.user.can_share.indexOf(doctype)!==-1;
 	},
 
 	can_set_user_permissions: function(doctype, frm) {
@@ -236,12 +242,28 @@ $.extend(frappe.model, {
 		return frappe.utils.filter_dict(docsdict, filters);
 	},
 
-	get_value: function(doctype, filters, fieldname) {
-		if(typeof filters==="string" && locals[doctype] && locals[doctype][filters]) {
-			return locals[doctype][filters][fieldname];
+	get_value: function(doctype, filters, fieldname, callback) {
+		if(callback) {
+			frappe.call({
+				method:"frappe.client.get_value",
+				args: {
+					doctype: doctype,
+					fieldname: fieldname,
+					filters: filters
+				},
+				callback: function(r) {
+					if(!r.exc) {
+						callback(r.message);
+					}
+				}
+			});
 		} else {
-			var l = frappe.get_list(doctype, filters);
-			return (l.length && l[0]) ? l[0][fieldname] : null;
+			if(typeof filters==="string" && locals[doctype] && locals[doctype][filters]) {
+				return locals[doctype][filters][fieldname];
+			} else {
+				var l = frappe.get_list(doctype, filters);
+				return (l.length && l[0]) ? l[0][fieldname] : null;
+			}
 		}
 	},
 

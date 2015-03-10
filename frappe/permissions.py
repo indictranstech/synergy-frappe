@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
 from __future__ import unicode_literals
@@ -39,10 +39,14 @@ def has_permission(doctype, ptype="read", doc=None, verbose=False, user=None):
 		return True
 
 	def false_if_not_shared():
-		if doc and ptype in ("read", "write", "share"):
-			shared = frappe.share.get_shared(meta.name, user, [ptype])
-			if doc.name in shared:
-				if verbose: print "Shared"
+		if ptype in ("read", "write", "share"):
+			shared = frappe.share.get_shared(doctype, user, [ptype])
+			if doc:
+				if doc.name in shared:
+					if verbose: print "Shared"
+					return True
+			else:
+				if verbose: print "Has a shared document"
 				return True
 
 		return False

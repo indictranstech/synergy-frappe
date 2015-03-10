@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // MIT License. See license.txt
 
 frappe.search = {
@@ -107,7 +107,7 @@ frappe.search = {
 		});
 	},
 	setup_recent: function() {
-		var recent = JSON.parse(frappe.boot.user.recent || "[]");
+		var recent = JSON.parse(frappe.boot.user.recent || "[]") || [];
 		frappe.search.recent = {};
 		for (var i=0, l=recent.length; i < l; i++) {
 			var d = recent[i];
@@ -157,7 +157,8 @@ frappe.search.verbs = [
 			var doctype = doctypes[i];
 			if(doctype[0]!==":" && !frappe.model.is_table(doctype)
 				&& !in_list(frappe.boot.single_types, doctype)
-				&& !in_list(["DocType", "DocField", "DocPerm"], doctype)) {
+				&& !in_list(["DocType", "DocField", "DocPerm", "Page", "Country",
+					"Currency", "Page Role", "Print Format"], doctype)) {
 				var values = frappe.utils.unique(keys(locals[doctype]).concat(frappe.search.recent[doctype] || []));
 				var ret = frappe.search.find(values, txt, function(match) {
 					return {

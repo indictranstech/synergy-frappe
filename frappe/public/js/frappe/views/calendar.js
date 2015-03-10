@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // MIT License. See license.txt
 
 frappe.provide("frappe.views.calendar");
@@ -43,7 +43,7 @@ frappe.views.Calendar = frappe.views.CalendarBase.extend({
 		this.page.set_title(__("Calendar") + " - " + __(this.doctype));
 
 		if (module !== "Desk") {
-			frappe.add_breadcrumbs(module, this.doctype)
+			frappe.breadcrumbs.add(module, this.doctype)
 		}
 
 		this.add_filters();

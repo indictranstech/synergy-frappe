@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
 from __future__ import unicode_literals
@@ -29,6 +29,9 @@ def get_notifications():
 				try:
 					result = frappe.get_list(d, fields=["count(*)"],
 						filters=condition, as_list=True)[0][0]
+
+				except frappe.PermissionError, e:
+					frappe.msgprint("Permission Error in notifications for {0}".format(d))
 
 				except Exception, e:
 					# OperationalError: (1412, 'Table definition has changed, please retry transaction')

@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
 from __future__ import unicode_literals
@@ -121,6 +121,12 @@ def get_website_settings():
 	context.web_include_css = hooks.web_include_css or []
 
 	add_website_theme(context)
+
+	via_hooks = frappe.get_hooks("website_context")
+	for key in via_hooks:
+		context[key] = via_hooks[key]
+		if key not in ("top_bar_items", "footer_items", "post_login"):
+			context[key] = context[key][0]
 
 	return context
 

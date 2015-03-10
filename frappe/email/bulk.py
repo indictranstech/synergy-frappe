@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
 from __future__ import unicode_literals
@@ -87,6 +87,7 @@ def add(email, sender, subject, formatted, text_content=None,
 	e = frappe.new_doc('Bulk Email')
 	e.sender = sender
 	e.recipient = email
+
 	try:
 		e.message = get_email(email, sender=e.sender, formatted=formatted, subject=subject,
 			text_content=text_content, attachments=attachments, reply_to=reply_to).as_string()

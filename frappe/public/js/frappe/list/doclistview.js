@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // MIT License. See license.txt
 
 frappe.provide('frappe.views.doclistview');
@@ -28,7 +28,12 @@ frappe.views.ListFactory = frappe.views.Factory.extend({
 		cur_list && cur_list.refresh();
 	},
 	set_cur_list: function() {
+		var route = frappe.get_route();
 		cur_list = frappe.container.page && frappe.container.page.doclistview;
+		if(cur_list && cur_list.doctype!==route[1]) {
+			// changing...
+			cur_list = null;
+		}
 	}
 });
 
@@ -75,7 +80,7 @@ frappe.views.DocListView = frappe.ui.Listing.extend({
 		var module = locals.DocType[this.doctype].module;
 
 		this.page.set_title(__("{0} List", [__(this.doctype)]));
-		frappe.add_breadcrumbs(module);
+		frappe.breadcrumbs.add(module, this.doctype);
 	},
 
 	setup: function() {

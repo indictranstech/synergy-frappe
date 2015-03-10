@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
 from __future__ import unicode_literals
@@ -41,6 +41,9 @@ def getdoc(doctype, name, user=None):
 		frappe.errprint(frappe.utils.get_traceback())
 		frappe.msgprint(_('Did not load'))
 		raise
+
+	if doc and not name.startswith('_'):
+		frappe.user.update_recent(doctype, name)
 
 	frappe.response.docs.append(doc)
 
@@ -85,7 +88,8 @@ def get_docinfo(doc=None, doctype=None, name=None):
 		"comments": get_comments(doc.doctype, doc.name),
 		"assignments": get_assignments(doc.doctype, doc.name),
 		"permissions": get_doc_permissions(doc),
-		"shared": [s.user for s in frappe.share.get_users(doc.doctype, doc.name, "user")]
+		"shared": frappe.share.get_users(doc.doctype, doc.name,
+			fields=["user", "read", "write", "share"])
 	}
 
 def get_user_permissions(meta):

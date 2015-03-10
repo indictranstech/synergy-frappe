@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // MIT License. See license.txt
 
 // My HTTP Request
@@ -67,6 +67,9 @@ frappe.request.call = function(opts) {
 			}
 
 			msgprint(__("Not permitted"));
+		},
+		409: function(xhr) {
+			msgprint(__("Another transaction is blocking this one. Please try again in a few seconds."));
 		},
 		417: function(data, xhr) {
 			if(typeof data === "string") data = JSON.parse(data);
