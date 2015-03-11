@@ -99,6 +99,7 @@ def handle():
 
 
 			elif doctype:
+				return "hi"
 				if frappe.local.request.method=="GET":
 					if frappe.local.form_dict.get('fields'):
 						frappe.local.form_dict['fields'] = json.loads(frappe.local.form_dict['fields'])
@@ -116,9 +117,11 @@ def handle():
 					})
 					frappe.db.commit()
 			else:
-				raise frappe.DoesNotExistError
+				frappe.local.response.http_status_code = 302
+				frappe.local.response.message = "Does DoesNotExistError"
 
 	else:
-		raise frappe.DoesNotExistError
+		frappe.local.response.http_status_code = 402
+		frappe.local.response.message = "Does DoesNotExistError"
 
 	return build_response("json")

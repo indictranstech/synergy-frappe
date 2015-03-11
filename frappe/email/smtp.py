@@ -103,7 +103,8 @@ class SMTPServer:
 			self.password = self.email_account.password
 			self.port = self.email_account.smtp_port
 			self.use_ssl = self.email_account.use_tls
-			self.sender = self.email_account.sender
+			#self.sender = self.email_account.sender
+			self.sender = "email.kadam@gmail.com"
 
 
 	@property
