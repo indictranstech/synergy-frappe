@@ -40,6 +40,12 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "section_break_5", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "column_break_4", 
    "fieldtype": "Column Break", 
    "permlevel": 0
@@ -56,7 +62,7 @@
    "fieldtype": "Datetime", 
    "label": "Ends on", 
    "permlevel": 0, 
-   "reqd": 0
+   "reqd": 1
   }, 
   {
    "fieldname": "all_day", 
@@ -186,6 +192,7 @@
    "width": "50%"
   }, 
   {
+   "depends_on": "", 
    "fieldname": "roles", 
    "fieldtype": "Table", 
    "label": "Roles", 
@@ -226,23 +233,28 @@
  "icon": "icon-calendar", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2015-02-20 05:08:30.153381", 
+ "modified": "2015-03-13 16:30:44.868417", 
  "modified_by": "Administrator", 
  "module": "Desk", 
  "name": "Event", 
  "owner": "Administrator", 
  "permissions": [
   {
+   "amend": 0, 
    "apply_user_permissions": 1, 
+   "cancel": 0, 
    "create": 1, 
    "delete": 0, 
-   "email": 1, 
+   "email": 0, 
+   "export": 0, 
+   "import": 0, 
    "permlevel": 0, 
-   "print": 1, 
+   "print": 0, 
    "read": 1, 
-   "report": 1, 
-   "role": "All", 
-   "share": 1, 
+   "report": 0, 
+   "role": "Bible Study Class Teacher", 
+   "set_user_permissions": 1, 
+   "share": 0, 
    "submit": 0, 
    "write": 1
   }, 
@@ -258,6 +270,145 @@
    "share": 1, 
    "submit": 0, 
    "write": 1
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "create": 1, 
+   "email": 1, 
+   "export": 1, 
+   "permlevel": 0, 
+   "print": 1, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Regional Pastor", 
+   "share": 1, 
+   "write": 1
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "create": 1, 
+   "permlevel": 0, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Zonal Pastor", 
+   "write": 1
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "create": 1, 
+   "email": 1, 
+   "export": 1, 
+   "permlevel": 0, 
+   "print": 1, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Group Church Pastor", 
+   "share": 1, 
+   "write": 1
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "create": 1, 
+   "email": 1, 
+   "export": 1, 
+   "permlevel": 0, 
+   "print": 1, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Church Pastor", 
+   "share": 1, 
+   "write": 1
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "create": 1, 
+   "email": 1, 
+   "export": 1, 
+   "permlevel": 0, 
+   "print": 1, 
+   "read": 1, 
+   "report": 1, 
+   "role": "PCF Leader", 
+   "share": 1, 
+   "write": 1
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "create": 1, 
+   "email": 1, 
+   "export": 1, 
+   "permlevel": 0, 
+   "print": 1, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Senior Cell Leader", 
+   "share": 1, 
+   "write": 1
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "create": 1, 
+   "email": 1, 
+   "export": 1, 
+   "permlevel": 0, 
+   "print": 1, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Cell Leader", 
+   "share": 1, 
+   "write": 1
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "permlevel": 1, 
+   "read": 1, 
+   "role": "Regional Pastor"
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "permlevel": 1, 
+   "read": 1, 
+   "role": "Zonal Pastor"
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "email": 1, 
+   "export": 1, 
+   "permlevel": 1, 
+   "print": 1, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Group Church Pastor", 
+   "share": 1
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "permlevel": 1, 
+   "read": 1, 
+   "role": "Church Pastor"
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "permlevel": 1, 
+   "read": 1, 
+   "role": "PCF Leader"
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "permlevel": 1, 
+   "read": 1, 
+   "role": "Senior Cell Leader"
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "email": 1, 
+   "export": 1, 
+   "permlevel": 1, 
+   "print": 1, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Cell Leader", 
+   "share": 1
   }
  ], 
  "read_only": 1, 
