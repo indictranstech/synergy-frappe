@@ -40,7 +40,7 @@ def clear_cache(user=None):
 
 def clear_global_cache():
 	frappe.model.meta.clear_cache()
-	frappe.cache().delete_value(["app_hooks", "installed_apps", "app_modules", "module_app", "time_zone"])
+	frappe.cache().delete_value(["app_hooks", "installed_apps", "app_modules", "module_app"])
 	frappe.setup_module_map()
 
 def clear_sessions(user=None, keep_current=False):
@@ -121,13 +121,14 @@ class Session:
 		self.full_name = full_name
 		self.data = frappe._dict({'data': frappe._dict({})})
 		self.time_diff = None
+
+		# set local session
+		frappe.local.session = self.data
+
 		if resume:
 			self.resume()
 		else:
 			self.start()
-
-		# set local session
-		frappe.local.session = self.data
 
 	def start(self):
 		"""start a new session"""
@@ -168,10 +169,11 @@ class Session:
 	def resume(self):
 		"""non-login request: load a session"""
 		import frappe
+
 		data = self.get_session_record()
 		if data:
 			# set language
-			self.data = frappe._dict({'data': data, 'user':data.user, 'sid': self.sid})
+			self.data.update({'data': data, 'user':data.user, 'sid': self.sid})
 		else:
 			self.start_as_guest()
 

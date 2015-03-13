@@ -147,25 +147,9 @@ fieldset {
 
 .page-content {
 	padding-bottom: 20px;
-	border-right: 1px solid @border-color;
-
 	hr {
 		margin-left: -15px;
 		margin-right: -15px;
-	}
-}
-
-@media (min-width: 768px) {
-	.page-content.col-sm-10 {
-		padding-right: 30px;
-
-		hr {
-			margin-right: -30px;
-		}
-
-		.website-list {
-			margin-right: -15px;
-		}
 	}
 }
 
@@ -235,7 +219,7 @@ fieldset {
 }
 
 .web-list-item:last-child {
-	margin-bottom: -1px;
+	border-bottom: none;
 }
 
 .blog-footer {
@@ -244,13 +228,26 @@ fieldset {
 	margin: 0px -15px -20px -15px;
 }
 
+.longform {
+	padding: 15px 0px;
+
+	p {
+		margin-bottom: 30px;
+	}
+}
+
+.blog-category {
+	margin-top: 60px;
+}
+
 .blogger {
 	padding: 10px 15px;
 	border-top: 1px solid @border-color;
 	margin: 0px -15px;
 }
 
-.blog-comments {
+.blog-comments,
+.help-article-comments {
     margin: 0px -15px;
     border-top: 1px solid @border-color;
     padding: 5px 15px 15px;
@@ -357,13 +354,15 @@ a.active {
 @media (max-width: 767px) {
 	.page-content {
 		min-height: 200px;
-		border-right: none !important;
 	}
 
 	.offcanvas-mobile-mixin();
 
 	.offcanvas {
-		ul {
+		.navbar-form {
+			margin: 0px;
+		}
+		.sidebar ul {
 			margin: 0px;
 		}
 
@@ -389,7 +388,6 @@ a.active {
 }
 
 #freeze {
-	background-color: @light-bg;
 	position: fixed;
 }
 

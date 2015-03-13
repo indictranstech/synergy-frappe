@@ -9,6 +9,7 @@ from frappe.website.website_generator import WebsiteGenerator
 from frappe.website.render import clear_cache
 from frappe.utils import today, cint, global_date_format, get_fullname
 from frappe.website.utils import find_first_image, get_comment_list
+from markdown2 import markdown
 
 class BlogPost(WebsiteGenerator):
 	save_versions = True
@@ -64,6 +65,9 @@ class BlogPost(WebsiteGenerator):
 			"description": context.description,
 		}
 
+		if "<!-- markdown -->" in context.content:
+			context.content = markdown(context.content)
+
 		image = find_first_image(self.content)
 		if image:
 			context.metatags["image"] = image
@@ -75,28 +79,28 @@ class BlogPost(WebsiteGenerator):
 		category = frappe.db.get_value("Blog Category", context.doc.blog_category, ["title", "page_name"], as_dict=1)
 		context.parents = [{"title": category.title, "name": "blog/{0}".format(category.page_name)}]
 
-	@staticmethod
-	def get_list_context(context=None):
-		list_context = frappe._dict(
-			page_title = _("Blog"),
-			template = "templates/includes/blog/blog.html",
-			row_template = "templates/includes/blog/blog_row.html",
-			get_list = get_blog_list,
-			hide_filters = True,
-			children = get_children()
-		)
+def get_list_context(context=None):
+	list_context = frappe._dict(
+		page_title = _("Blog"),
+		template = "templates/includes/blog/blog.html",
+		row_template = "templates/includes/blog/blog_row.html",
+		get_list = get_blog_list,
+		hide_filters = True,
+		children = get_children()
+	)
 
-		if frappe.local.form_dict.category:
-			list_context.blog_subtitle = _("Posts filed under {0}").format(get_blog_category(frappe.local.form_dict.category))
-			list_context.parents = [{ "name": "blog", "title": _("Blog") }]
+	if frappe.local.form_dict.category:
+		list_context.blog_subtitle = _("Posts filed under {0}").format(get_blog_category(frappe.local.form_dict.category))
 
-		elif frappe.local.form_dict.by:
-			blogger = frappe.db.get_value("Blogger", {"name": frappe.local.form_dict.by}, "full_name")
-			list_context.blog_subtitle = _("Posts by {0}").format(blogger)
-			list_context.parents = [{ "name": "blog", "title": _("Blog") }]
+	elif frappe.local.form_dict.by:
+		blogger = frappe.db.get_value("Blogger", {"name": frappe.local.form_dict.by}, "full_name")
+		list_context.blog_subtitle = _("Posts by {0}").format(blogger)
 
-		list_context.update(frappe.get_doc("Blog Settings", "Blog Settings").as_dict())
-		return list_context
+	elif frappe.local.form_dict.txt:
+		list_context.blog_subtitle = _('Filtered by "{0}"').format(frappe.local.form_dict.txt)
+
+	list_context.update(frappe.get_doc("Blog Settings", "Blog Settings").as_dict())
+	return list_context
 
 def get_children():
 	return frappe.db.sql("""select concat("blog/", page_name) as name,
@@ -117,34 +121,36 @@ def get_blog_category(page_name):
 	return frappe.db.get_value("Blog Category", {"page_name": page_name }) or page_name
 
 def get_blog_list(doctype, txt=None, filters=None, limit_start=0, limit_page_length=20):
-	condition = ""
+	conditions = []
 	if filters:
 		if filters.by:
-			condition = ' and t1.blogger="%s"' % filters.by
+			conditions.append('t1.blogger="%s"' % filters.by)
 		if filters.category:
-			condition += ' and t1.blog_category="%s"' % get_blog_category(filters.category)
+			conditions.append('t1.blog_category="%s"' % get_blog_category(filters.category))
 
-		if condition:
-			frappe.local.no_cache = 1
+	if txt:
+		conditions.append('t1.content like "%{0}%"'.format(frappe.db.escape(txt)))
+
+	if conditions:
+		frappe.local.no_cache = 1
 
 	query = """\
 		select
-			t1.title, t1.name,
+			t1.title, t1.name, t1.blog_category, t1.parent_website_route, t1.published_on,
 				concat(t1.parent_website_route, "/", t1.page_name) as page_name,
 				t1.published_on as creation,
-				day(t1.published_on) as day, monthname(t1.published_on) as month,
-				year(t1.published_on) as year,
 				ifnull(t1.blog_intro, t1.content) as content,
 				t2.full_name, t2.avatar, t1.blogger,
 				(select count(name) from `tabComment` where
-					comment_doctype='Blog Post' and comment_docname=t1.name) as comments
+					comment_doctype='Blog Post' and comment_docname=t1.name and comment_type="Comment") as comments
 		from `tabBlog Post` t1, `tabBlogger` t2
 		where ifnull(t1.published,0)=1
 		and t1.blogger = t2.name
 		%(condition)s
 		order by published_on desc, name asc
 		limit %(start)s, %(page_len)s""" % {
-			"start": limit_start, "page_len": limit_page_length, "condition": condition
+			"start": limit_start, "page_len": limit_page_length,
+				"condition": (" and " + " and ".join(conditions)) if conditions else ""
 		}
 
 	posts = frappe.db.sql(query, as_dict=1)
@@ -163,7 +169,5 @@ def get_blog_list(doctype, txt=None, filters=None, limit_start=0, limit_page_len
 
 		if (not "http:" in post.avatar or "https:" in post.avatar) and not post.avatar.startswith("/"):
 			post.avatar = "/" + post.avatar
-
-		post.month = post.month.upper()[:3]
 
 	return posts

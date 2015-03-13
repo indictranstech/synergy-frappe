@@ -87,7 +87,6 @@ frappe.assets = {
 	load: function(src) {
 		// this is virtual page load, only get the the source
 		// *without* the template
-		frappe.set_loading();
 
 		frappe.call({
 			method:"frappe.client.get_js",
@@ -97,10 +96,9 @@ frappe.assets = {
 			callback: function(r) {
 				frappe.assets.add(src, r.message);
 			},
-			async: false
+			async: false,
+			freeze: true,
 		})
-
-		frappe.done_loading();
 	},
 
 	// pass on to the handler to set

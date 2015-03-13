@@ -59,7 +59,7 @@ frappe.dom = {
 		};
 		return ele;
 	},
-	freeze: function(msg) {
+	freeze: function(msg, css_class) {
 		// blur
 		if(!$('#freeze').length) {
 			var freeze = $('<div id="freeze" class="modal-backdrop fade"></div>')
@@ -71,13 +71,17 @@ frappe.dom = {
 				})
 				.appendTo("#body_div");
 
-			freeze.html(repl('<div class="freeze-message-container"><div class="freeze-message">%(msg)s</div></div>',
+			freeze.html(repl('<div class="freeze-message-container"><div class="freeze-message"><p class="lead">%(msg)s</p></div></div>',
 				{msg: msg || ""}));
 
 			setTimeout(function() { freeze.addClass("in") }, 1);
 
 		} else {
 			$("#freeze").addClass("in");
+		}
+
+		if (css_class) {
+			freeze.addClass(css_class);
 		}
 
 		frappe.dom.freeze_count++;
@@ -129,24 +133,6 @@ frappe.dom = {
 frappe.get_modal = function(title, content) {
 	return $(frappe.render_template("modal", {title:title, content:content})).appendTo(document.body);
 };
-
-var pending_req = 0
-frappe.set_loading = function() {
-	pending_req++;
-	$('body').css('cursor', 'progress').attr("data-ajax-state", "running");
-	NProgress.start();
-	$("body");
-}
-
-frappe.done_loading = function() {
-	pending_req--;
-	if(!pending_req){
-		$('body').css('cursor', 'default').attr("data-ajax-state", "complete");
-		NProgress.done();
-	} else {
-		NProgress.inc();
-	}
-}
 
 var get_hex = function(i) {
 	i = Math.round(i);
