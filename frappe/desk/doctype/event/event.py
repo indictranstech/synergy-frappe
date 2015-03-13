@@ -118,14 +118,30 @@ class Event(Document):
 
 def get_permission_query_conditions(user):
 	if not user: user = frappe.session.user
-	return """(tabEvent.event_type='Public' or tabEvent.owner='%(user)s'
+	abc="""(tabEvent.event_type='Public' or tabEvent.owner='%(user)s'
 		or exists(select * from `tabEvent Role` where
 			`tabEvent Role`.parent=tabEvent.name
 			and `tabEvent Role`.role in ('%(roles)s')))
+		or 
+		tabEvent.cell=(select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Cell Master')
+		or
+		tabEvent.senior_cell=(select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Senior Cell Master')
+		or
+		tabEvent.pcf=(select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='PCF Master')
+		or
+		tabEvent.church=(select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Church Master')
+		or
+		tabEvent.church_group=(select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Church Group Master')
+		or
+		tabEvent.zone=(select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Zone Master')
+		or
+		tabEvent.region=(select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Region Master')
 		""" % {
 			"user": frappe.db.escape(user),
 			"roles": "', '".join([frappe.db.escape(r) for r in frappe.get_roles(user)])
 		}
+	#frappe.errprint(abc)
+	return abc
 
 def has_permission(doc, user):
 	if doc.event_type=="Public" or doc.owner==user:
@@ -133,6 +149,17 @@ def has_permission(doc, user):
 
 	if doc.get("roles", {"role":("in", frappe.get_roles(user))}):
 		return True
+
+	if doc.pcf:
+		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='PCF Master'"%(user),debug=1)
+		frappe.errprint(res)
+		if res:
+			return True
+	if doc.church:
+		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='Church Master'"%(user),debug=1)
+		frappe.errprint(res)
+		if res:
+			return True
 
 	return False
 

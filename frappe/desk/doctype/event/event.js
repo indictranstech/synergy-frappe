@@ -9,6 +9,8 @@ frappe.ui.form.on("Event", "event_group", function(frm,dt,dn) {
     set_field_permlevel('pcf',1);
     set_field_permlevel('zone',2);
     set_field_permlevel('region',2);
+    set_field_permlevel('roles',0);
+
   }
   else if(frm.doc.event_group=='Regional'){
     set_field_permlevel('cell',2);
@@ -17,7 +19,8 @@ frappe.ui.form.on("Event", "event_group", function(frm,dt,dn) {
     set_field_permlevel('church_group',2);
     set_field_permlevel('pcf',2);
     set_field_permlevel('zone',2);
-    set_field_permlevel('region',1);
+    set_field_permlevel('region',0);
+    set_field_permlevel('roles',3);
   }
   else if(frm.doc.event_group=='Zonal'){
     set_field_permlevel('cell',2);
@@ -25,53 +28,69 @@ frappe.ui.form.on("Event", "event_group", function(frm,dt,dn) {
     set_field_permlevel('church',2);
     set_field_permlevel('church_group',2);
     set_field_permlevel('pcf',2);
-    set_field_permlevel('zone',1);
+    set_field_permlevel('zone',0);
     set_field_permlevel('region',2);
+    set_field_permlevel('roles',3);
   }
   else if(frm.doc.event_group=='Church Group'){
     set_field_permlevel('cell',2);
     set_field_permlevel('senior_cell',2);
     set_field_permlevel('church',2);
-    set_field_permlevel('church_group',1);
+    set_field_permlevel('church_group',0);
     set_field_permlevel('pcf',2);
     set_field_permlevel('zone',2);
     set_field_permlevel('region',2);
+    set_field_permlevel('roles',3);
   }
   else if(frm.doc.event_group=='Church'){
     set_field_permlevel('cell',2);
     set_field_permlevel('senior_cell',2);
-    set_field_permlevel('church',1);
+    set_field_permlevel('church',0);
     set_field_permlevel('church_group',2);
     set_field_permlevel('pcf',2);
     set_field_permlevel('zone',2);
     set_field_permlevel('region',2);
+    set_field_permlevel('roles',3);
   }
   else if(frm.doc.event_group=='PCF'){
     set_field_permlevel('cell',2);
     set_field_permlevel('senior_cell',2);
     set_field_permlevel('church',2);
     set_field_permlevel('church_group',2);
-    set_field_permlevel('pcf',1);
+    set_field_permlevel('pcf',0);
     set_field_permlevel('zone',2);
     set_field_permlevel('region',2);
+    set_field_permlevel('roles',3);
   }
   else if(frm.doc.event_group=='Sr Cell'){
     set_field_permlevel('cell',2);
-    set_field_permlevel('senior_cell',1);
+    set_field_permlevel('senior_cell',0);
     set_field_permlevel('church',2);
     set_field_permlevel('church_group',2);
     set_field_permlevel('pcf',2);
     set_field_permlevel('zone',2);
     set_field_permlevel('region',2);
+    set_field_permlevel('roles',3);
   }
   else if(frm.doc.event_group=='Cell'){
-    set_field_permlevel('cell',1);
+    set_field_permlevel('cell',0);
     set_field_permlevel('senior_cell',2);
     set_field_permlevel('church',2);
     set_field_permlevel('church_group',2);
     set_field_permlevel('pcf',2);
     set_field_permlevel('zone',2);
     set_field_permlevel('region',2);
+    set_field_permlevel('roles',3);
+  }
+  else {
+    set_field_permlevel('cell',2);
+    set_field_permlevel('senior_cell',2);
+    set_field_permlevel('church',2);
+    set_field_permlevel('church_group',2);
+    set_field_permlevel('pcf',2);
+    set_field_permlevel('zone',2);
+    set_field_permlevel('region',2);
+    set_field_permlevel('roles',2);
   }
 });
 
@@ -84,18 +103,15 @@ frappe.ui.form.on("Event", "refresh", function(frm,dt,dn) {
   if(!frm.doc.__islocal ) {
       frm.add_custom_button(__("Create Attendance"), cur_frm.cscript.create_event_attendance,frappe.boot.doctype_icons["Customer"], "btn-default");
   }
-  if (frm.doc.event_group==='Only Leadres'){
-    console.log("only leaders");
-  }
-
-  get_server_fields('set_higher_values','','',frm.doc, dt, dn, 1, function(r){
+  
+  /*get_server_fields('set_higher_values','','',frm.doc, dt, dn, 1, function(r){
       refresh_field('region');
       refresh_field('zone');
       refresh_field('church_group');
       refresh_field('church');
       refresh_field('pcf');
       refresh_field('senior_cell');
-    });
+    });*/
 
 });
 
@@ -117,7 +133,6 @@ frappe.ui.form.on("Event", "starts_on", function(frm,doc) {
     var m = today.getMinutes();
     var s = today.getSeconds();
     var date = b +'-'+ a + '-' + d + ' ' + h + ':' + m + ':' + s ;
-    console.log(frm.doc.starts_on < date)
     if(frm.doc.starts_on < date){
       msgprint("Start Date should be todays or greater than todays date.");
       throw "Check Start Date";
@@ -125,7 +140,7 @@ frappe.ui.form.on("Event", "starts_on", function(frm,doc) {
   }
 });
 frappe.ui.form.on("Event", "ends_on", function(frm,doc) {
-  if(frm.doc.ends_on) {
+  if(frm.doc.starts_on) {
     if(frm.doc.starts_on > frm.doc.ends_on){
       msgprint("End Date should be greater than start date.");
       throw "Check  Date";
@@ -146,49 +161,54 @@ frappe.ui.form.on("Event", "onload", function(frm,doc) {
     	}
 
     if (in_list(user_roles, "Cell Leader")){
-    set_field_permlevel('cell',1);
+    set_field_permlevel('cell',0);
     set_field_permlevel('senior_cell',2);
     set_field_permlevel('church',2);
     set_field_permlevel('church_group',2);
     set_field_permlevel('pcf',2);
     set_field_permlevel('zone',2);
     set_field_permlevel('region',2);
+    set_field_permlevel('roles',3);
   }
   else if(in_list(user_roles, "Senior Cell Leader")){
     set_field_permlevel('cell',1);
-    set_field_permlevel('senior_cell',1);
+    set_field_permlevel('senior_cell',0);
     set_field_permlevel('church',2);
     set_field_permlevel('church_group',2);
     set_field_permlevel('pcf',2);
     set_field_permlevel('zone',2);
     set_field_permlevel('region',2);
+    set_field_permlevel('roles',3);
   }
   else if(in_list(user_roles, "PCF Leader")){
     set_field_permlevel('cell',1);
     set_field_permlevel('senior_cell',1);
-    set_field_permlevel('pcf',1);
+    set_field_permlevel('pcf',0);
     set_field_permlevel('church',2);
     set_field_permlevel('church_group',2);
     set_field_permlevel('zone',2);
     set_field_permlevel('region',2);
+    set_field_permlevel('roles',3);
   }
   else if(in_list(user_roles, "Church Pastor")){
     set_field_permlevel('cell',1);
     set_field_permlevel('senior_cell',1);
     set_field_permlevel('pcf',1);
-    set_field_permlevel('church',1);
+    set_field_permlevel('church',0);
     set_field_permlevel('church_group',2);
     set_field_permlevel('zone',2);
     set_field_permlevel('region',2);
+    set_field_permlevel('roles',3);
   }
   else if(in_list(user_roles, "Group Church Pastor")){
     set_field_permlevel('cell',1);
     set_field_permlevel('senior_cell',1);
     set_field_permlevel('pcf',1);
     set_field_permlevel('church',1);
-    set_field_permlevel('church_group',1);
+    set_field_permlevel('church_group',0);
     set_field_permlevel('zone',2);
     set_field_permlevel('region',2);
+    set_field_permlevel('roles',3);
   }
   else if(in_list(user_roles, "Zonal Pastor")){
     set_field_permlevel('cell',1);
@@ -196,8 +216,9 @@ frappe.ui.form.on("Event", "onload", function(frm,doc) {
     set_field_permlevel('pcf',1);
     set_field_permlevel('church',1);
     set_field_permlevel('church_group',1);
-    set_field_permlevel('zone',1);
+    set_field_permlevel('zone',0);
     set_field_permlevel('region',2);
+    set_field_permlevel('roles',3);
   }
   else if(in_list(user_roles, "Regional Pastor")){
     set_field_permlevel('cell',1);
@@ -206,7 +227,18 @@ frappe.ui.form.on("Event", "onload", function(frm,doc) {
     set_field_permlevel('church',1);
     set_field_permlevel('church_group',1);
     set_field_permlevel('zone',1);
-    set_field_permlevel('region',1);
+    set_field_permlevel('region',0);
+    set_field_permlevel('roles',3);
+  }
+  else {
+    set_field_permlevel('cell',2);
+    set_field_permlevel('senior_cell',2);
+    set_field_permlevel('church',2);
+    set_field_permlevel('church_group',2);
+    set_field_permlevel('pcf',2);
+    set_field_permlevel('zone',2);
+    set_field_permlevel('region',2);
+    set_field_permlevel('roles',2);
   }
     // if (frm.doc.event_group==='Only Leaders'){
     //   console.log("only leaders");
