@@ -131,7 +131,7 @@ def get_permission_query_conditions(user):
 		or
 		tabEvent.church=(select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Church Master')
 		or
-		tabEvent.church_group=(select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Church Group Master')
+		tabEvent.church_group=(select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Group Church Master')
 		or
 		tabEvent.zone=(select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Zone Master')
 		or
