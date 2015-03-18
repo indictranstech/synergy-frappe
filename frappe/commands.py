@@ -50,7 +50,7 @@ def get_single_site(context):
 @click.option('--db-name', help='Database name')
 @click.option('--mariadb-root-username', default='root', help='Root username for MariaDB')
 @click.option('--mariadb-root-password', help='Root password for MariaDB')
-@click.option('--admin-password', help='Administrator password for new site', prompt=True)
+@click.option('--admin-password', help='Administrator password for new site', default=None)
 @click.option('--verbose', is_flag=True, default=False, help='Verbose')
 @click.option('--force', help='Force restore if site/database already exists', is_flag=True, default=False)
 @click.option('--source_sql', help='Initiate database with a SQL file')
@@ -259,6 +259,7 @@ def watch():
 def clear_cache(context):
 	"Clear cache, doctype cache and defaults"
 	import frappe.sessions
+	import frappe.website.render
 	from frappe.desk.notifications import clear_notifications
 	for site in context.sites:
 		try:
@@ -266,6 +267,7 @@ def clear_cache(context):
 			frappe.connect()
 			frappe.clear_cache()
 			clear_notifications()
+			frappe.website.render.clear_cache()
 		finally:
 			frappe.destroy()
 
