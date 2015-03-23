@@ -1,12 +1,13 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // MIT License. See license.txt
+
 frappe.ui.form.on("Event", "event_group", function(frm,dt,dn) {
   if (frm.doc.event_group=='Only Leaders'){
-    set_field_permlevel('cell',1);
-    set_field_permlevel('senior_cell',1);
+    set_field_permlevel('cell',0);
+    set_field_permlevel('senior_cell',0);
     set_field_permlevel('church',2);
     set_field_permlevel('church_group',2);
-    set_field_permlevel('pcf',1);
+    set_field_permlevel('pcf',0);
     set_field_permlevel('zone',2);
     set_field_permlevel('region',2);
     set_field_permlevel('roles',0);

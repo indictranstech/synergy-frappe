@@ -140,7 +140,7 @@ def get_permission_query_conditions(user):
 			"user": frappe.db.escape(user),
 			"roles": "', '".join([frappe.db.escape(r) for r in frappe.get_roles(user)])
 		}
-	#frappe.errprint(abc)
+	# frappe.errprint(abc)
 	return abc
 
 def has_permission(doc, user):
