@@ -145,17 +145,50 @@ def get_permission_query_conditions(user):
 
 def has_permission(doc, user):
 	if doc.event_type=="Public" or doc.owner==user:
+		frappe.errprint("first if")
 		return True
 
 	if doc.get("roles", {"role":("in", frappe.get_roles(user))}):
+		frappe.errprint("second if")
 		return True
+
+	if doc.cell:
+		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='Cell Master'"%(user),debug=1)
+		frappe.errprint(res)
+		if res:
+			return True
+
+	if doc.senior_cell:
+		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='Senior Cell Master'"%(user),debug=1)
+		frappe.errprint(res)
+		if res:
+			return True
 
 	if doc.pcf:
 		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='PCF Master'"%(user),debug=1)
 		frappe.errprint(res)
 		if res:
 			return True
+
 	if doc.church:
+		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='Church Master'"%(user),debug=1)
+		frappe.errprint(res)
+		if res:
+			return True
+
+	if doc.church_group:
+		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='Church Master'"%(user),debug=1)
+		frappe.errprint(res)
+		if res:
+			return True
+
+	if doc.zone:
+		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='Church Master'"%(user),debug=1)
+		frappe.errprint(res)
+		if res:
+			return True
+
+	if doc.region:
 		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='Church Master'"%(user),debug=1)
 		frappe.errprint(res)
 		if res:
