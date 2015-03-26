@@ -16,6 +16,9 @@ def sync_all(force=0, verbose=False):
 	block_user(True)
 
 	for app in frappe.get_installed_apps():
+	    #if app=='church_ministry':
+	    #	print "in chuch"
+	    #else:
 		sync_for(app, force, verbose=verbose)
 
 	block_user(False)
