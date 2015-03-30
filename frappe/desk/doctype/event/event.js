@@ -57,7 +57,7 @@ frappe.ui.form.on("Event", "ends_on", function(frm,doc) {
 
 frappe.ui.form.on("Event", "onload", function(frm,doc) {
 		$( "#map-canvas" ).remove();
-		$(cur_frm.get_field("address").wrapper).append('<div id="map-canvas" style="width: 425px; height: 125px;"></div>');
+		$(cur_frm.get_field("address").wrapper).append('<div id="map-canvas" style="width: 425px; height: 425px;"></div>');
 		if(!frm.doc.__islocal ) {
 			cur_frm.cscript.create_pin_on_map(frm.doc,frm.doc.lat,frm.doc.lon);
 			frm.add_custom_button(__("Create Attendance"), cur_frm.cscript.create_event_attendance,frappe.boot.doctype_icons["Customer"], "btn-default");
@@ -74,7 +74,7 @@ cur_frm.cscript.create_event_attendance = function() {
 cur_frm.cscript.create_pin_on_map=function(doc,lat,lon){
         var latLng = new google.maps.LatLng(lat, lon);
         var map = new google.maps.Map(document.getElementById('map-canvas'), {
-            zoom: 10,
+            zoom: 16,
             center: latLng,
             mapTypeId: google.maps.MapTypeId.ROADMAP
           });
@@ -160,7 +160,7 @@ cur_frm.cscript.address = function(doc, dt, dn){
           var latLng = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
 
           var map = new google.maps.Map(document.getElementById('map-canvas'), {
-              zoom: 10,
+              zoom: 16,
               center: latLng,
               mapTypeId: google.maps.MapTypeId.ROADMAP
             });

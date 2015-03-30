@@ -439,7 +439,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 5, 
- "modified": "2015-02-23 16:33:53.515001", 
+ "modified": "2015-03-30 18:55:54.618530", 
  "modified_by": "Administrator", 
  "module": "Core", 
  "name": "User", 
@@ -501,6 +501,69 @@
    "read": 1, 
    "report": 1, 
    "role": "Member", 
+   "write": 1
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "create": 1, 
+   "permlevel": 0, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Cell Leader", 
+   "write": 1
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "create": 1, 
+   "permlevel": 0, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Senior Cell Leader", 
+   "write": 1
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "create": 1, 
+   "permlevel": 0, 
+   "read": 1, 
+   "report": 1, 
+   "role": "PCF Leader", 
+   "write": 1
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "create": 1, 
+   "permlevel": 0, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Church Pastor", 
+   "write": 1
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "create": 1, 
+   "permlevel": 0, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Group Church Pastor", 
+   "write": 1
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "create": 1, 
+   "permlevel": 0, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Zonal Pastor", 
+   "write": 1
+  }, 
+  {
+   "apply_user_permissions": 1, 
+   "create": 1, 
+   "permlevel": 0, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Regional Pastor", 
    "write": 1
   }
  ], 
