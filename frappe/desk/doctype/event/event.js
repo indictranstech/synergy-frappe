@@ -32,17 +32,11 @@ frappe.ui.form.on("Event", "repeat_on", function(frm,doc) {
 
 frappe.ui.form.on("Event", "starts_on", function(frm,doc) {
   if(frm.doc.starts_on) {
-    var  today = new Date ();
-    var d = ('0' + today.getDate()).slice(-2);
-    var a = ('0' + (today.getMonth() + 1)).slice(-2);
-    var b = today.getFullYear();
-    var h = today.getHours();
-    var m = today.getMinutes();
-    var s = today.getSeconds();
-    var date = b +'-'+ a + '-' + d + ' ' + h + ':' + m + ':' + s ;
+    var date= frappe.datetime.now_datetime()
+    // console.log(date)
     if(frm.doc.starts_on < date){
       msgprint("Start Date should be todays or greater than todays date.");
-      throw "Check Start Date";
+      // throw "Check Start Date";
     }
   }
 });
@@ -50,7 +44,7 @@ frappe.ui.form.on("Event", "ends_on", function(frm,doc) {
   if(frm.doc.starts_on) {
     if(frm.doc.starts_on > frm.doc.ends_on){
       msgprint("End Date should be greater than start date.");
-      throw "Check  Date";
+      // throw "Check  Date";
     }
   }
 });
