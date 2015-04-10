@@ -60,7 +60,7 @@ frappe.ui.form.on("Event", "onload", function(frm,doc) {
 
 cur_frm.cscript.create_event_attendance = function() {
 		frappe.model.open_mapped_doc({
-			method: "church_ministry.church_ministry.doctype.cell_meeting_invitation.cell_meeting_invitation.create_event_attendance",
+			method: "church_ministry.church_ministry.doctype.event_attendance.event_attendance.create_event_attendance",
 			frm: cur_frm
 		})
 }
