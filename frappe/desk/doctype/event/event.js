@@ -7,9 +7,9 @@ frappe.ui.form.on("Event", "refresh", function(frm,dt,dn) {
 			frappe.set_route("Form", frm.doc.ref_type, frm.doc.ref_name);
 		}, frappe.boot.doctype_icons[frm.doc.ref_type]);
 	}
-  if(!frm.doc.__islocal ) {
-      frm.add_custom_button(__("Create Attendance"), cur_frm.cscript.create_event_attendance,frappe.boot.doctype_icons["Customer"], "btn-default");
-  }
+  //if(!frm.doc.__islocal ) {
+  //    frm.add_custom_button(__("Create Attendance"), cur_frm.cscript.create_event_attendance,frappe.boot.doctype_icons["Customer"], "btn-default");
+  ///}
   
   /*get_server_fields('set_higher_values','','',frm.doc, dt, dn, 1, function(r){
       refresh_field('region');
@@ -54,7 +54,7 @@ frappe.ui.form.on("Event", "onload", function(frm,doc) {
 		$(cur_frm.get_field("address").wrapper).append('<div id="map-canvas" style="width: 425px; height: 425px;"></div>');
 		if(!frm.doc.__islocal ) {
 			cur_frm.cscript.create_pin_on_map(frm.doc,frm.doc.lat,frm.doc.lon);
-			frm.add_custom_button(__("Create Attendance"), cur_frm.cscript.create_event_attendance,frappe.boot.doctype_icons["Customer"], "btn-default");
+			//frm.add_custom_button(__("Create Attendance"), cur_frm.cscript.create_event_attendance,frappe.boot.doctype_icons["Customer"], "btn-default");
 		}
 });
 
