@@ -22,6 +22,22 @@ frappe.ui.form.on("Event", "refresh", function(frm,dt,dn) {
 
 });
 
+frappe.ui.form.on("Event", "validate", function(frm,doc) {
+   if(frm.doc.starts_on) {
+    var date= frappe.datetime.now_datetime()
+    if(frm.doc.starts_on < date){
+      msgprint("Start Date should be todays or greater than todays date.");
+      throw "Check Start Date";
+    }
+  }
+  if(frm.doc.starts_on) {
+    if(frm.doc.starts_on > frm.doc.ends_on){
+      msgprint("End Date should be greater than start date.");
+      throw "Check  Date";
+    }
+  }
+});
+
 frappe.ui.form.on("Event", "repeat_on", function(frm,doc) {
 	if(frm.doc.repeat_on==="Every Day") {
 		$.each(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"], function(i,v) {
@@ -30,24 +46,24 @@ frappe.ui.form.on("Event", "repeat_on", function(frm,doc) {
 	}
 });
 
-frappe.ui.form.on("Event", "starts_on", function(frm,doc) {
-  if(frm.doc.starts_on) {
-    var date= frappe.datetime.now_datetime()
-    // console.log(date)
-    if(frm.doc.starts_on < date){
-      msgprint("Start Date should be todays or greater than todays date.");
-      // throw "Check Start Date";
-    }
-  }
-});
-frappe.ui.form.on("Event", "ends_on", function(frm,doc) {
-  if(frm.doc.starts_on) {
-    if(frm.doc.starts_on > frm.doc.ends_on){
-      msgprint("End Date should be greater than start date.");
-      // throw "Check  Date";
-    }
-  }
-});
+// frappe.ui.form.on("Event", "starts_on", function(frm,doc) {
+//   if(frm.doc.starts_on) {
+//     var date= frappe.datetime.now_datetime()
+//     // console.log(date)
+//     if(frm.doc.starts_on < date){
+//       msgprint("Start Date should be todays or greater than todays date.");
+//       // throw "Check Start Date";
+//     }
+//   }
+// });
+// frappe.ui.form.on("Event", "ends_on", function(frm,doc) {
+//   if(frm.doc.starts_on) {
+//     if(frm.doc.starts_on > frm.doc.ends_on){
+//       msgprint("End Date should be greater than start date.");
+//       // throw "Check  Date";
+//     }
+//   }
+// });
 
 frappe.ui.form.on("Event", "onload", function(frm,doc) {
 		$( "#map-canvas" ).remove();

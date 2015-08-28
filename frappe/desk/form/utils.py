@@ -60,7 +60,29 @@ def validate_link():
 @frappe.whitelist()
 def add_comment(doc):
 	"""allow any logged user to post a comment"""
-	doc = frappe.get_doc(json.loads(doc))
+	record=json.loads(doc)
+	if record['comment_doctype']=='Attendance Record':
+		mail_notify_msg = """Dear User, <br><br>
+									'{0}' had commented '{1}' on the Attendance Record '{2}'. <br><br>Please Check. <br><br>
+							Records, <br><br>
+							Love World Synergy""".format(record['comment_by'],record['comment'],record['comment_docname'])
+		notify = frappe.db.sql("""select value from `tabSingles` where doctype='Notification Settings' and field = 'when_a_leader_makes_a_comment'""",as_list=1)
+		hirerchy=frappe.db.sql("select a.name,a.device_id from `tabDefaultValue` b, `tabUser` a where a.name=b.parent and b.defkey='Senior Cells' and b.defvalue=(select senior_cell from `tabAttendance Record` where name='%s')" %record['comment_docname'],as_list=1)
+		user = frappe.db.sql("""select phone_1 from `tabMember` where email_id='%s'"""%(hirerchy[0][0]),as_list=1)
+		if "Email" in notify[0][0]:
+			frappe.sendmail(recipients=hirerchy[0][0], content=mail_notify_msg, subject='Attendance Record comment Notification')
+			frappe.sendmail(recipients='gangadhar.k@indictranstech.com', content=mail_notify_msg, subject='Attendance Record comment Notification')
+		if "SMS" in notify[0][0]:
+			from erpnext.setup.doctype.sms_settings.sms_settings import send_sms			
+			if user:
+				send_sms(user[0][0], mail_notify_msg)
+		if "Push Notification" in notify[0][0]:
+			data={}
+			data['Message']=mail_notify_msg
+			from gcm import GCM
+			gcm = GCM('AIzaSyBIc4LYCnUU9wFV_pBoFHHzLoGm_xHl-5k')
+			res = gcm.json_request(registration_ids=[x[1] for x in hirerchy], data=data,collapse_key='uptoyou', delay_while_idle=True, time_to_live=3600)	
+	doc = frappe.get_doc(record)
 	doc.insert(ignore_permissions = True)
 
 	return doc.as_dict()

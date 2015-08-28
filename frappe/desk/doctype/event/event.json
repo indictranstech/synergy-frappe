@@ -40,12 +40,6 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "section_break_5", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0, 
-   "precision": ""
-  }, 
-  {
    "fieldname": "column_break_4", 
    "fieldtype": "Column Break", 
    "permlevel": 0
@@ -53,6 +47,7 @@
   {
    "fieldname": "starts_on", 
    "fieldtype": "Datetime", 
+   "hidden": 0, 
    "label": "Starts on", 
    "permlevel": 0, 
    "reqd": 1
@@ -60,6 +55,7 @@
   {
    "fieldname": "ends_on", 
    "fieldtype": "Datetime", 
+   "hidden": 0, 
    "label": "Ends on", 
    "permlevel": 0, 
    "reqd": 1
@@ -233,7 +229,7 @@
  "icon": "icon-calendar", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2015-04-01 15:08:48.896933", 
+ "modified": "2015-08-25 18:02:23.773072", 
  "modified_by": "Administrator", 
  "module": "Desk", 
  "name": "Event", 
