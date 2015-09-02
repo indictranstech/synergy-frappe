@@ -62,10 +62,12 @@ def add_comment(doc):
 	"""allow any logged user to post a comment"""
 	record=json.loads(doc)
 	if record['comment_doctype']=='Attendance Record':
-		mail_notify_msg = """Dear User, <br><br>
-									'{0}' had commented '{1}' on the Attendance Record '{2}'. <br><br>Please Check. <br><br>
-							Records, <br><br>
-							Love World Synergy""".format(record['comment_by'],record['comment'],record['comment_docname'])
+		mail_notify_msg = """Dear User, \n
+		'{0}' had commented '{1}' on the Attendance Record '{2}'. \n
+		Please Check. \n
+		\n
+		Records, \n
+		Love World Synergy""".format(record['comment_by'],record['comment'],record['comment_docname'])
 		notify = frappe.db.sql("""select value from `tabSingles` where doctype='Notification Settings' and field = 'when_a_leader_makes_a_comment'""",as_list=1)
 		hirerchy=frappe.db.sql("select a.name,a.device_id from `tabDefaultValue` b, `tabUser` a where a.name=b.parent and b.defkey='Senior Cells' and b.defvalue=(select senior_cell from `tabAttendance Record` where name='%s')" %record['comment_docname'],as_list=1)
 		user = frappe.db.sql("""select phone_1 from `tabMember` where email_id='%s'"""%(hirerchy[0][0]),as_list=1)
