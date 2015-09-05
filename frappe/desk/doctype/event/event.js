@@ -2,6 +2,10 @@
 // MIT License. See license.txt
 
 frappe.ui.form.on("Event", "refresh", function(frm,dt,dn) {
+  var date = frappe.datetime.now_datetime()
+  // console.log(date)
+  // console.log(frm.doc.starts_on)
+  // console.log(frm.doc.starts_on < '2015-09-04 10:31:00')
 	if(frm.doc.ref_type && frm.doc.ref_name) {
 		frm.add_custom_button(__(frm.doc.ref_name), function() {
 			frappe.set_route("Form", frm.doc.ref_type, frm.doc.ref_name);
@@ -23,17 +27,19 @@ frappe.ui.form.on("Event", "refresh", function(frm,dt,dn) {
 });
 
 frappe.ui.form.on("Event", "validate", function(frm,doc) {
-   if(frm.doc.starts_on) {
-    var date= frappe.datetime.now_datetime()
+  var date = frappe.datetime.now_datetime()
+   if(frm.doc.starts_on){
+    // var date = frappe.datetime.now_datetime()
+    // console.log(28-08-2015 08:00:00 < 2015-09-04 10:31:00)
     if(frm.doc.starts_on < date){
       msgprint("Start Date should be todays or greater than todays date.");
       throw "Check Start Date";
     }
   }
-  if(frm.doc.starts_on) {
-    if(frm.doc.starts_on > frm.doc.ends_on){
+  if(frm.doc.starts_on && frm.doc.ends_on){
+    if(frm.doc.starts_on >= frm.doc.ends_on){
       msgprint("End Date should be greater than start date.");
-      throw "Check  Date";
+      throw "Check End Date";
     }
   }
 });

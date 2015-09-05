@@ -85,3 +85,5 @@ def has_permission(doc, user):
 		return True
 	else:
 		return doc.owner==user or doc.assigned_by==user
+
+
