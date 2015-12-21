@@ -68,6 +68,7 @@ on_session_creation = [
 
 permission_query_conditions = {
 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
+	"Task": "erpnext.projects.doctype.task.task.get_permission_query_conditions",
 	"ToDo": "frappe.desk.doctype.todo.todo.get_permission_query_conditions",
 	"User": "frappe.core.doctype.user.user.get_permission_query_conditions",
 	"Feed": "frappe.desk.doctype.feed.feed.get_permission_query_conditions",
@@ -76,6 +77,7 @@ permission_query_conditions = {
 
 has_permission = {
 	"Event": "frappe.desk.doctype.event.event.has_permission",
+	"Task": "erpnext.projects.doctype.task.task.has_permission",
 	"ToDo": "frappe.desk.doctype.todo.todo.has_permission",
 	"User": "frappe.core.doctype.user.user.has_permission",
 	"Feed": "frappe.desk.doctype.feed.feed.has_permission",
