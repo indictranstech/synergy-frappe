@@ -229,7 +229,7 @@
  "icon": "icon-calendar", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2015-08-25 18:02:23.773072", 
+ "modified": "2015-12-21 17:24:49.795386", 
  "modified_by": "Administrator", 
  "module": "Desk", 
  "name": "Event", 
@@ -237,7 +237,7 @@
  "permissions": [
   {
    "amend": 0, 
-   "apply_user_permissions": 1, 
+   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 0, 
@@ -255,6 +255,7 @@
    "write": 1
   }, 
   {
+   "apply_user_permissions": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -268,7 +269,7 @@
    "write": 1
   }, 
   {
-   "apply_user_permissions": 1, 
+   "apply_user_permissions": 0, 
    "create": 1, 
    "email": 1, 
    "export": 1, 
@@ -281,7 +282,7 @@
    "write": 1
   }, 
   {
-   "apply_user_permissions": 1, 
+   "apply_user_permissions": 0, 
    "create": 1, 
    "permlevel": 0, 
    "read": 1, 
@@ -290,7 +291,7 @@
    "write": 1
   }, 
   {
-   "apply_user_permissions": 1, 
+   "apply_user_permissions": 0, 
    "create": 1, 
    "email": 1, 
    "export": 1, 
@@ -303,7 +304,7 @@
    "write": 1
   }, 
   {
-   "apply_user_permissions": 1, 
+   "apply_user_permissions": 0, 
    "create": 1, 
    "email": 1, 
    "export": 1, 
@@ -316,7 +317,7 @@
    "write": 1
   }, 
   {
-   "apply_user_permissions": 1, 
+   "apply_user_permissions": 0, 
    "create": 1, 
    "email": 1, 
    "export": 1, 
@@ -329,7 +330,7 @@
    "write": 1
   }, 
   {
-   "apply_user_permissions": 1, 
+   "apply_user_permissions": 0, 
    "create": 1, 
    "email": 1, 
    "export": 1, 
@@ -342,7 +343,7 @@
    "write": 1
   }, 
   {
-   "apply_user_permissions": 1, 
+   "apply_user_permissions": 0, 
    "create": 1, 
    "email": 1, 
    "export": 1, 
@@ -355,7 +356,7 @@
    "write": 1
   }, 
   {
-   "apply_user_permissions": 1, 
+   "apply_user_permissions": 0, 
    "permlevel": 0, 
    "read": 1, 
    "report": 1, 
