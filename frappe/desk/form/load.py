@@ -30,9 +30,9 @@ def getdoc(doctype, name, user=None):
 	try:
 		doc = frappe.get_doc(doctype, name)
 		run_onload(doc)
-		frappe.errprint(doctype)
-		frappe.errprint(name)
-		frappe.errprint(user)
+		# frappe.errprint(doctype)
+		# frappe.errprint(name)
+		# frappe.errprint(user)
 		if not doc.has_permission("read"):
 			raise frappe.PermissionError, "read"
 

@@ -7,7 +7,6 @@ frappe.provide("frappe.views.calendars");
 frappe.views.CalendarFactory = frappe.views.Factory.extend({
 	make: function(route) {
 		var me = this;
-
 		frappe.require('assets/frappe/js/lib/fullcalendar/fullcalendar.css');
 		frappe.require('assets/frappe/js/lib/fullcalendar/fullcalendar.js');
 

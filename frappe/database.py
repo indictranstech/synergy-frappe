@@ -116,7 +116,7 @@ class Database:
 				if debug:
 					try:
 						self.explain_query(query, values)
-						frappe.errprint(query % values)
+						# frappe.errprint(query % values)
 					except TypeError:
 						frappe.errprint([query, values])
 				if (frappe.conf.get("logging") or False)==2:
@@ -131,7 +131,7 @@ class Database:
 			else:
 				if debug:
 					self.explain_query(query)
-					frappe.errprint(query)
+					# frappe.errprint(query)
 				if (frappe.conf.get("logging") or False)==2:
 					frappe.log("<<<< query")
 					frappe.log(query)
