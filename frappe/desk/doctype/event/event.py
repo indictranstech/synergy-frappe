@@ -154,6 +154,9 @@ def has_permission(doc, user):
 	if doc.get("roles", {"role":("in", frappe.get_roles(user))}):
 		return True
 
+	if "System Manager" in frappe.get_roles(user):
+		return True
+
 	if doc.cell:
 		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='Cells'"%(user))
 		if res:

@@ -82,6 +82,7 @@ has_permission = {
 	"User": "frappe.core.doctype.user.user.has_permission",
 	"Feed": "frappe.desk.doctype.feed.feed.has_permission",
 	"Note": "frappe.desk.doctype.note.note.has_permission"
+	
 }
 
 doc_events = {
