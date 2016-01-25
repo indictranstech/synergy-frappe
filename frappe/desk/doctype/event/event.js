@@ -40,6 +40,104 @@ frappe.ui.form.on("Event", "repeat_on", function(frm,doc) {
 	}
 });
 
+frappe.ui.form.on("Event", "event_group", function(frm,doc) {
+  
+  if(frm.doc.event_group==="Only Leaders") {
+    set_field_permlevel('roles',0);
+    set_field_permlevel('participants',0);
+
+  }
+   else {
+    set_field_permlevel('roles',3);
+    set_field_permlevel('participants',0);
+  
+  roleshr={
+    "Zonal Pastor":"Zonal,Church Group,Church,Only Leaders,PCF,Sr Cell,Cell",
+    "Group Church Pastor":"Church Group,Church,Only Leaders,PCF,Sr Cell,Cell",
+    "Church Pastor":"Church,Only Leaders,PCF,Sr Cell,Cell",
+    "PCF Leader":"Only Leaders,PCF,Sr Cell,Cell",
+    "Senior Cell Leader":"Only Leaders,Sr Cell,Cell",
+    "Cell Leader":"Cell"
+  }
+
+  if(in_list(user_roles, "Zonal Pastor")){
+    var desigarray=roleshr['Zonal Pastor'].split(",")
+    var inarry=desigarray.indexOf(frm.doc.event_group)
+    if (parseInt(inarry) < 0){
+      alert ("You have not permitted to select the Event Group "+frm.doc.event_group);
+      cur_frm.set_value("event_group","Zonal")                 
+      refresh_field("event_group");
+      set_field_permlevel('zone',1);
+    }  
+  }
+
+  else if(in_list(user_roles, "Group Church Pastor")){
+    var desigarray=roleshr['Group Church Pastor'].split(",")
+    var inarry=desigarray.indexOf(frm.doc.event_group)
+    if (parseInt(inarry) < 0){
+      alert ("You have not permitted to select the Event Group "+frm.doc.event_group);
+      cur_frm.set_value("event_group","Church Group")                 
+      refresh_field("event_group");
+      set_field_permlevel('church_group',1);
+    }  
+  }
+
+  else if(in_list(user_roles, "Church Pastor")){
+    var desigarray=roleshr['Church Pastor'].split(",")
+    var inarry=desigarray.indexOf(frm.doc.event_group)
+    if (parseInt(inarry) < 0){
+      alert ("You have not permitted to select the Event Group "+frm.doc.event_group);
+      cur_frm.set_value("event_group","Church")                 
+      refresh_field("event_group");
+      set_field_permlevel('church',1);
+    }  
+  }
+
+  else if(in_list(user_roles, "PCF Leader")){
+    var desigarray=roleshr['PCF Leader'].split(",")
+    var inarry=desigarray.indexOf(frm.doc.event_group)
+    if (parseInt(inarry) < 0){
+      alert ("You have not permitted to select the Event Group "+frm.doc.event_group);
+      cur_frm.set_value("event_group","PCF")                 
+      refresh_field("event_group");
+      set_field_permlevel('pcf',1);
+    }  
+  }
+
+  else if(in_list(user_roles, "Senior Cell Leader")){
+    var desigarray=roleshr['Senior Cell Leader'].split(",")
+    var inarry=desigarray.indexOf(frm.doc.event_group)
+    if (parseInt(inarry) < 0){
+      alert ("You have not permitted to select the Event Group "+frm.doc.event_group);
+      cur_frm.set_value("event_group","Sr Cell")                 
+      refresh_field("event_group");
+      set_field_permlevel('senior_cell',1);
+      //refresh_field("senior_cell");
+    }  
+  }
+
+  else if(in_list(user_roles, "Cell Leader")){
+    var desigarray=roleshr['Cell Leader'].split(",")
+    var inarry=desigarray.indexOf(frm.doc.event_group)
+    if (parseInt(inarry) < 0){
+      alert ("You have not permitted to select the Event Group "+frm.doc.event_group);
+      cur_frm.set_value("event_group","Cell")                 
+      refresh_field("event_group");
+      set_field_permlevel('cell',1);
+    }  
+  }
+}
+
+});
+
+
+
+cur_frm.fields_dict.roles.grid.get_field("role").get_query = function(doc) {
+      return {
+        query:'church_ministry.church_ministry.doctype.first_timer.first_timer.get_event_roles'
+    }
+};
+
 
 frappe.ui.form.on("Event", "onload", function(frm,doc) {
 		$( "#map-canvas" ).remove();
@@ -48,11 +146,14 @@ frappe.ui.form.on("Event", "onload", function(frm,doc) {
 			cur_frm.cscript.create_pin_on_map(frm.doc,frm.doc.lat,frm.doc.lon);
 			//frm.add_custom_button(__("Create Attendance"), cur_frm.cscript.create_event_attendance,frappe.boot.doctype_icons["Customer"], "btn-default");
 		}
+    if(frm.doc.event_group==="") {
+      set_field_permlevel('participants',3);
+    }
 });
 
 cur_frm.cscript.create_event_attendance = function() {
 		frappe.model.open_mapped_doc({
-			method: "church_ministry.church_ministry.doctype.event_attendance.event_attendance.create_event_attendance",
+			method: "church_ministry.church_ministry.doctype.attendance_record.attendance_record.create_event_attendance",
 			frm: cur_frm
 		})
 }
