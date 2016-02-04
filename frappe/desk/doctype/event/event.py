@@ -37,10 +37,25 @@ def get_permission_query_conditions(user):
 			tabEvent.zone=(select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Zones')
 			or
 			tabEvent.region=(select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Regions')
+			or 			
+			tabEvent.cell=(select cell from tabMember where email_id='%(user)s' )
+			or 
+			tabEvent.senior_cell=(select senior_cell from tabMember where email_id='%(user)s' )
+			or 
+			tabEvent.pcf=(select pcf from tabMember where email_id='%(user)s' )
+			or 
+			tabEvent.church=(select church from tabMember where email_id='%(user)s' )
+			or 
+			tabEvent.church_group=(select church_group from tabMember where email_id='%(user)s' )
+			or 
+			tabEvent.zone=(select zone from tabMember where email_id='%(user)s' )
+			or 
+			tabEvent.region=(select region from tabMember where email_id='%(user)s' )
 			""" % {
 				"user": frappe.db.escape(user),
 				"roles": "', '".join([frappe.db.escape(r) for r in frappe.get_roles(user)])
 			}
+		#frappe.errprint(abc)
 		return abc
 
 def has_permission(doc, user):
@@ -54,37 +69,44 @@ def has_permission(doc, user):
 		return True
 
 	if doc.cell:
-		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='Cells'"%(user))
+		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='Cells'\
+			union select cell from tabMember where email_id='%s' and cell='%s' "%(user,user,doc.cell))
 		if res:
 			return True
 
 	if doc.senior_cell:
-		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='Senior Cells'"%(user))
+		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='Senior Cells'\
+			union select senior_cell from tabMember where email_id='%s' and senior_cell='%s' "%(user,user,doc.senior_cell))
 		if res:
 			return True
 
 	if doc.pcf:
-		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='PCFs'"%(user))
+		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='PCFs'\
+			union select pcf from tabMember where email_id='%s' and pcf='%s' "%(user,user,doc.pcf))
 		if res:
 			return True
 
 	if doc.church:
-		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='Churches'"%(user))
+		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='Churches'\
+			union select church from tabMember where email_id='%s' and church='%s' "%(user,user,doc.church))
 		if res:
 			return True
 
 	if doc.church_group:
-		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='Churches'"%(user))
+		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='Group Churches'\
+			union select church_group from tabMember where email_id='%s' and church_group='%s' "%(user,user,doc.church_group))
 		if res:
 			return True
 
 	if doc.zone:
-		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='Churches'"%(user))
+		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='Zones'\
+			union select zone from tabMember where email_id='%s' and zone='%s' "%(user,user,doc.zone))
 		if res:
 			return True
 
 	if doc.region:
-		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='Churches'"%(user))
+		res=frappe.db.sql("select distinct defvalue from `tabDefaultValue` where parent='%s' and defkey='Regions'\
+			union select region from tabMember where email_id='%s' and region='%s' "%(user,user,doc.region))
 		if res:
 			return True
 
