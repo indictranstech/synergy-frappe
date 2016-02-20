@@ -495,7 +495,9 @@ frappe.views.DocListView = frappe.ui.Listing.extend({
 					this.filter_list.add_filter(this.doctype, fieldname, 'like', '%' + label);
 				} else {
 					// or for rest using "in"
-					filter.set_values(this.doctype, fieldname, 'in', v + ', ' + label);
+					// gangadhar commented folowing line and added new line for left side bar filters and condition rather than in 
+					//filter.set_values(this.doctype, fieldname, 'in', v + ', ' + label);
+					filter.set_values(this.doctype, fieldname, '=', label);
 				}
 			}
 		} else {
