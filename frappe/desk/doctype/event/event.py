@@ -24,33 +24,33 @@ def get_permission_query_conditions(user):
 				`tabEvent Role`.parent=tabEvent.name
 				and `tabEvent Role`.role in ('%(roles)s')))
 			or 
-			tabEvent.cell=(select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Cells')
+			tabEvent.cell in (select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Cells')
 			or
-			tabEvent.senior_cell=(select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Senior Cells')
+			tabEvent.senior_cell in (select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Senior Cells')
 			or
-			tabEvent.pcf=(select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='PCFs')
+			tabEvent.pcf in (select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='PCFs')
 			or
-			tabEvent.church=(select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Churches')
+			tabEvent.church in (select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Churches')
 			or
-			tabEvent.church_group=(select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Group Churches')
+			tabEvent.church_group in (select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Group Churches')
 			or
-			tabEvent.zone=(select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Zones')
+			tabEvent.zone in (select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Zones')
 			or
-			tabEvent.region=(select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Regions')
+			tabEvent.region in (select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Regions')
 			or 			
-			tabEvent.cell=(select cell from tabMember where email_id='%(user)s' )
+			tabEvent.cell in (select cell from tabMember where email_id='%(user)s' )
 			or 
-			tabEvent.senior_cell=(select senior_cell from tabMember where email_id='%(user)s' )
+			tabEvent.senior_cell in (select senior_cell from tabMember where email_id='%(user)s' )
 			or 
-			tabEvent.pcf=(select pcf from tabMember where email_id='%(user)s' )
+			tabEvent.pcf in (select pcf from tabMember where email_id='%(user)s' )
 			or 
-			tabEvent.church=(select church from tabMember where email_id='%(user)s' )
+			tabEvent.church in (select church from tabMember where email_id='%(user)s' )
 			or 
-			tabEvent.church_group=(select church_group from tabMember where email_id='%(user)s' )
+			tabEvent.church_group in (select church_group from tabMember where email_id='%(user)s' )
 			or 
-			tabEvent.zone=(select zone from tabMember where email_id='%(user)s' )
+			tabEvent.zone in (select zone from tabMember where email_id='%(user)s' )
 			or 
-			tabEvent.region=(select region from tabMember where email_id='%(user)s' )
+			tabEvent.region in (select region from tabMember where email_id='%(user)s' )
 			""" % {
 				"user": frappe.db.escape(user),
 				"roles": "', '".join([frappe.db.escape(r) for r in frappe.get_roles(user)])

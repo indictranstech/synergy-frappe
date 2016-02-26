@@ -186,9 +186,11 @@ class User(Document):
 		args.update(add_args)
 
 		sender = frappe.session.user not in STANDARD_USERS and frappe.session.user or None
-
-		frappe.sendmail(recipients=self.email, sender=sender, subject=subject,
+		try:
+			frappe.sendmail(recipients=self.email, sender=sender, subject=subject,
 			message=frappe.get_template(template).render(args))
+		except Exception , SMTPDataError :
+			print Exception
 
 	def a_system_manager_should_exist(self):
 		if not self.get_other_system_managers():

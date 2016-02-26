@@ -140,9 +140,11 @@ cur_frm.fields_dict.roles.grid.get_field("role").get_query = function(doc) {
 
 
 frappe.ui.form.on("Event", "onload", function(frm,doc) {
-		$( "#map-canvas" ).remove();
-		$(cur_frm.get_field("address").wrapper).append('<div id="map-canvas" style="width: 425px; height: 425px;"></div>');
-		if(!frm.doc.__islocal ) {
+		
+		
+		if(!frm.doc.__islocal && frm.doc.address) {
+      $( "#map-canvas" ).remove();
+      $(cur_frm.get_field("address").wrapper).append('<div id="map-canvas" style="width: 425px; height: 425px;"></div>');
 			cur_frm.cscript.create_pin_on_map(frm.doc,frm.doc.lat,frm.doc.lon);
 			//frm.add_custom_button(__("Create Attendance"), cur_frm.cscript.create_event_attendance,frappe.boot.doctype_icons["Customer"], "btn-default");
 		}
@@ -245,7 +247,10 @@ cur_frm.cscript.address = function(doc, dt, dn){
           doc.address=results[0].formatted_address;
           refresh_field('address');
           var latLng = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
-
+          $( "#map-canvas" ).remove();
+          if (doc.address){
+            $(cur_frm.get_field("address").wrapper).append('<div id="map-canvas" style="width: 425px; height: 425px;"></div>');
+          }
           var map = new google.maps.Map(document.getElementById('map-canvas'), {
               zoom: 16,
               center: latLng,
