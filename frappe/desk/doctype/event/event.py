@@ -22,7 +22,7 @@ def get_permission_query_conditions(user):
 		abc="""(tabEvent.event_type='Public' or tabEvent.owner='%(user)s'
 			or exists(select * from `tabEvent Role` where
 				`tabEvent Role`.parent=tabEvent.name
-				and `tabEvent Role`.role in ('%(roles)s')))
+				and `tabEvent Role`.role in ('%(roles)s'))
 			or 
 			tabEvent.cell in (select distinct defvalue from `tabDefaultValue` where parent='%(user)s' and defkey='Cells')
 			or
@@ -50,12 +50,12 @@ def get_permission_query_conditions(user):
 			or 
 			tabEvent.zone in (select zone from tabMember where email_id='%(user)s' )
 			or 
-			tabEvent.region in (select region from tabMember where email_id='%(user)s' )
+			tabEvent.region in (select region from tabMember where email_id='%(user)s' ))
 			""" % {
 				"user": frappe.db.escape(user),
 				"roles": "', '".join([frappe.db.escape(r) for r in frappe.get_roles(user)])
 			}
-		#frappe.errprint(abc)
+		#print abc
 		return abc
 
 def has_permission(doc, user):
