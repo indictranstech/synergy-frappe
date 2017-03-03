@@ -104,7 +104,7 @@ def notify_assignment(assigned_by, owner, doc_type, doc_name, action='CLOSE',
 	# Search for email address in description -- i.e. assignee
 	from frappe.utils import get_url_to_form
 	assignment = get_url_to_form(doc_type, doc_name, label="%s: %s" % (doc_type, doc_name))
-
+	print "Ass :",assignment
 	if action=='CLOSE':
 		if owner == frappe.session.get('user'):
 			arg = {

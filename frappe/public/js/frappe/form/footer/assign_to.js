@@ -132,6 +132,7 @@ frappe.ui.form.AssignTo = Class.extend({
 					if(!r.exc) {
 						me.render(r.message);
 						me.frm.reload_doc();
+						$('.btn-primary').prop('disabled', true);
 					}
 				},
 				btn: this
